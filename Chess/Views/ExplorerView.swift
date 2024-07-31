@@ -29,7 +29,7 @@ struct ExplorerView: View {
                         Spacer()
                         if let pointDifference = pointDifference(), pointDifference > 0 {
                             Text("+\(pointDifference)")
-                                .foregroundColor(Color.black.opacity(0.5))
+                                .foregroundColor(Color.secondary.opacity(0.5))
                                 .padding(.leading, 5)
                         }
                     }
@@ -204,7 +204,7 @@ struct MoveLogView: View {
                                 Text(moves[moveIndex].move)
                                     .frame(width: 60, alignment: .leading)
                                     .font(.system(size: 14))
-                                    .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.black.opacity(0.4))  // Apply transparency to the move
+                                    .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.secondary.opacity(0.4))  // Apply transparency to the move
                                     .fixedSize(horizontal: true, vertical: false)
                             }
                             .onTapGesture {
@@ -222,7 +222,7 @@ struct MoveLogView: View {
                             Text(moves[moveIndex].move)
                                 .frame(width: 60, alignment: .leading)
                                 .font(.system(size: 14))
-                                .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.black.opacity(0.4))  // Apply transparency to the move
+                                .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.secondary.opacity(0.4))  // Apply transparency to the move
                                 .fixedSize(horizontal: true, vertical: false)
                             }
                             .onTapGesture {
