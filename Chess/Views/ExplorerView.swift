@@ -20,6 +20,7 @@ struct ExplorerView: View {
     
     var body: some View {
         NavigationStack {
+            
             GeometryReader { geometry in
                 let size = min(geometry.size.width, geometry.size.height * 0.7)
                 VStack(spacing: 0) {
@@ -29,7 +30,7 @@ struct ExplorerView: View {
                         Spacer()
                         if let pointDifference = pointDifference(), pointDifference > 0 {
                             Text("+\(pointDifference)")
-                                .foregroundColor(Color.secondary.opacity(0.5))
+                                .foregroundColor(Color.black.opacity(0.5))
                                 .padding(.leading, 5)
                         }
                     }
@@ -98,7 +99,7 @@ struct ExplorerView: View {
                         }
                         MoveLogView(board: board, selectedMoveIndex: $selectedMoveIndex, whiteMove: $whiteMove, isMate: $isMate)
                             .frame(width: 230, height: 200)
-                            .background(Color.gray.opacity(0.1))
+                            .background(Color.gray.opacity(0.3))
                             .cornerRadius(10)
                             .padding(.bottom, 20)
                             .padding(.trailing, 20)
@@ -113,11 +114,15 @@ struct ExplorerView: View {
                     })
                 }
             }
+            .background(Color.white)
+//            .ignoresSafeArea()
             .onReceive(board.promotionPublisher) { details in
                 self.promotionDetails = details
                 self.showingPromotionDialog = true
             }
+            
         }
+        
     }
     
     private func pointDifference() -> Int? {
@@ -204,7 +209,7 @@ struct MoveLogView: View {
                                 Text(moves[moveIndex].move)
                                     .frame(width: 60, alignment: .leading)
                                     .font(.system(size: 14))
-                                    .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.secondary.opacity(0.4))  // Apply transparency to the move
+                                    .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.black.opacity(0.4))  // Apply transparency to the move
                                     .fixedSize(horizontal: true, vertical: false)
                             }
                             .onTapGesture {
@@ -222,7 +227,7 @@ struct MoveLogView: View {
                             Text(moves[moveIndex].move)
                                 .frame(width: 60, alignment: .leading)
                                 .font(.system(size: 14))
-                                .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.secondary.opacity(0.4))  // Apply transparency to the move
+                                .foregroundColor(selectedMoveIndex == moveIndex ? .blue : Color.black.opacity(0.4))  // Apply transparency to the move
                                 .fixedSize(horizontal: true, vertical: false)
                             }
                             .onTapGesture {
@@ -358,10 +363,10 @@ struct ChessPiecesView: View {
                             if let piece = board.getPiece(row: row, col: col) {
                                 Image(uiImage: piece.img!)
                                     .resizable()
-                                    .frame(width: squareSize * 0.8, height: squareSize * 0.8)
+                                    .frame(width: squareSize * 0.9, height: squareSize * 0.9)
                                     .scaleEffect(isSelectedPosition(row: row, col: col) ? 1.2 : 1.0)
                                     .animation(.easeInOut(duration: 0.2), value: isPieceSelected)
-                                    .shadow(color: Color.black.opacity(0.4), radius: 4, x: 2, y: 2)
+                                    .shadow(color: Color.black.opacity(0.4), radius: 2, x: 1, y: 1)
                                     .rotationEffect(isMate && piece.pieceType == "king" && (piece.color == "white" && whiteMove || piece.color == "black" && !whiteMove) ? .degrees(-90) : .degrees(0))
                                     .onTapGesture {
                                         feedbackGenerator.impactOccurred()
@@ -458,12 +463,12 @@ struct sideMenu: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
                     showMenu.toggle()
                 }, label: {
                     Image(systemName: "line.3.horizontal")
-                        .foregroundColor(Color.black)
+                        .foregroundColor(Color.blue)
                 })
             }
         }

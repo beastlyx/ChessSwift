@@ -21,7 +21,12 @@ class BoardState {
         }
         
         let lastMove = undoneMoves.remove(at: 0)
-        lastMove.board.movePiece(piece: lastMove.piece, newPosition: lastMove.newPosition)
+        
+        if lastMove.isCastle == true {
+            lastMove.board.movePiece(piece: lastMove.piece, newPosition: lastMove.newPosition)
+        } else {
+            lastMove.board.makeMove(piece: lastMove.piece, capturedPiece: lastMove.capturedPiece, fromPosition: lastMove.oldPosition, newPosition: lastMove.newPosition, isPromotion: lastMove.isPromotion, isCastle: lastMove.isCastle, isEnPassant: lastMove.isEnPassant, originalPawn: lastMove.originalPawn)
+        }
 //        makeMove(piece: lastMove.piece, capturedPiece: lastMove.capturedPiece, fromPosition: lastMove.oldPosition, newPosition: lastMove.newPosition, isPromotion: lastMove.isPromotion, isCastle: lastMove.isCastle, isEnPassant: lastMove.isEnPassant, originalPawn: lastMove.originalPawn)
     }
     
