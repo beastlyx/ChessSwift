@@ -20,12 +20,14 @@ class CapturedPieces {
     }
     
     func reset() {
+        self.whitePieces = [:]
         self.whitePieces["queen"] = []
         self.whitePieces["rook"] = []
         self.whitePieces["bishop"] = []
         self.whitePieces["knight"] = []
         self.whitePieces["pawn"] = []
         
+        self.blackPieces = [:]
         self.blackPieces["queen"] = []
         self.blackPieces["rook"] = []
         self.blackPieces["bishop"] = []

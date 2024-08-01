@@ -17,6 +17,9 @@ struct ExplorerView: View {
     @State private var selectedMoveIndex: Int? = nil
     @State private var showingPromotionDialog = false
     @State private var promotionDetails: (Int, Int, String, (GamePiece) -> Void)?
+    @State private var lightSquareColor: Color = .white
+    @State private var darkSquareColor: Color = Color(red: 218/255, green: 140/255, blue: 44/255)
+    @State private var showingEditBoardView = false
     
     var body: some View {
         NavigationStack {
@@ -24,7 +27,7 @@ struct ExplorerView: View {
             GeometryReader { geometry in
                 let size = min(geometry.size.width, geometry.size.height * 0.7)
                 VStack(spacing: 0) {
-                    sideMenu()
+                    sideMenu(showingEditBoardView: $showingEditBoardView)
                     HStack(spacing: 0) {
                         CapturedPiecesView(capturedPieces: board.capturedPieces.getWhiteCapturedPieces())
                         Spacer()
@@ -39,10 +42,10 @@ struct ExplorerView: View {
                     
                     ZStack {
                         let squareSize = size / 8
-                        let color1 = Color(red: 227/255, green: 193/255, blue: 111/255)
-                        let color2 = Color(red: 184/255, green: 139/255, blue: 74/255)
+//                        let color2 = Color(red: 218/255, green: 140/255, blue: 44/255)
+//                        let color1 = Color(red: 255/255, green: 255/255, blue: 255/255)
                         
-                        ChessBoardView(squareSize: squareSize, color1: color1, color2: color2)
+                        ChessBoardView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor)
                             .frame(width: size, height: size)
                         
                         ChessPiecesView(board: board, squareSize: squareSize, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex)
@@ -99,7 +102,7 @@ struct ExplorerView: View {
                         }
                         MoveLogView(board: board, selectedMoveIndex: $selectedMoveIndex, whiteMove: $whiteMove, isMate: $isMate)
                             .frame(width: 230, height: 200)
-                            .background(Color.gray.opacity(0.3))
+                            .background(Color.gray.opacity(0.1))
                             .cornerRadius(10)
                             .padding(.bottom, 20)
                             .padding(.trailing, 20)
@@ -120,7 +123,9 @@ struct ExplorerView: View {
                 self.promotionDetails = details
                 self.showingPromotionDialog = true
             }
-            
+            .sheet(isPresented: $showingEditBoardView) {
+                EditBoardView(lightSquareColor: $lightSquareColor, darkSquareColor: $darkSquareColor)
+            }
         }
         
     }
@@ -335,25 +340,25 @@ struct ChessPiecesView: View {
                     ForEach(0..<8, id: \.self) { col in
                         ZStack {
                             if let ep = enPassantPosition, ep == (row, col) {
-                                RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
+                                RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                     .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
-                                    .opacity(0.8)
+//                                    .opacity(0.8)
                                 
                             }
                             if legalMoves.contains(where: { $0 == (row, col)}) {
                                 if legalCaptures.contains(where: { $0 == (row, col) }) {
-                                    RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
+                                    RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                         .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
-                                        .opacity(0.8)
+//                                        .opacity(0.8)
                                         .onTapGesture {
                                             feedbackGenerator.impactOccurred()
                                             movePiece(to: (row, col))
                                         }
                                 } else {
                                     Circle()
-                                        .fill(Color.blue.opacity(0.25))
-                                        .shadow(color: Color.black.opacity(0.6), radius: 4, x: 2, y: 2)
-                                        .frame(width: squareSize * 0.5, height: squareSize * 0.5)
+                                        .fill(Color.gray.opacity(0.9))
+                                        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 2, y: 2)
+                                        .frame(width: squareSize * 0.4, height: squareSize * 0.4)
                                         .onTapGesture {
                                             feedbackGenerator.impactOccurred()
                                             movePiece(to: (row, col))
@@ -363,7 +368,9 @@ struct ChessPiecesView: View {
                             if let piece = board.getPiece(row: row, col: col) {
                                 Image(uiImage: piece.img!)
                                     .resizable()
+                                    .aspectRatio(contentMode: .fit)
                                     .frame(width: squareSize * 0.9, height: squareSize * 0.9)
+                                    .scaledToFit()
                                     .scaleEffect(isSelectedPosition(row: row, col: col) ? 1.2 : 1.0)
                                     .animation(.easeInOut(duration: 0.2), value: isPieceSelected)
                                     .shadow(color: Color.black.opacity(0.4), radius: 2, x: 1, y: 1)
@@ -435,11 +442,7 @@ struct ChessPiecesView: View {
 
         selectedMoveIndex = board.getMoveLog().count - 1
 
-        if let last = board.getMoveLog().last {
-            if last.isCheckmate {
-                isMate = true
-            }
-        }
+        isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
         
         whiteMove.toggle()
         selectedPiece = nil
@@ -454,8 +457,8 @@ struct ChessPiecesView: View {
 }
 
 struct sideMenu: View {
-    @State private var showMenu = false
-    
+    @Binding var showingEditBoardView: Bool
+
     var body: some View {
         VStack {
 
@@ -465,7 +468,7 @@ struct sideMenu: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    showMenu.toggle()
+                    showingEditBoardView = true
                 }, label: {
                     Image(systemName: "line.3.horizontal")
                         .foregroundColor(Color.blue)
@@ -488,7 +491,7 @@ struct PromotionDialogOverlay: View {
                         let newPiece = createPiece(type: type, color: details.2)
                         onSelect(newPiece)
                     }) {
-                        Image(uiImage: UIImage(named: "\(details.2)_\(type)")!)
+                        Image(uiImage: UIImage(named: "\(details.2)-\(type)")!)
                             .resizable()
                             .frame(width: 50, height: 50)
                     }
@@ -508,7 +511,7 @@ struct PromotionDialogOverlay: View {
         case "queen":
             return Queen(row: 0, col: 0, color: color)
         case "rook":
-            return Rook(row: 0, col: 0, color: color, id: "\(color)_rook")
+            return Rook(row: 0, col: 0, color: color, id: "\(color)-rook")
         case "bishop":
             return Bishop(row: 0, col: 0, color: color)
         case "knight":

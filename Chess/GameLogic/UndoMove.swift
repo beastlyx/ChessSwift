@@ -35,6 +35,9 @@ class UndoMove {
 
     func undo() {
 //        self.board.moveLog.removeLast()
+        if let capturedPiece = self.capturedPiece {
+            self.board.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
+        }
         if self.isCastle {
             var rook: GamePiece?
             // kingside castle undo
@@ -118,8 +121,6 @@ class UndoMove {
             }
         }
         
-        if let capturedPiece = self.capturedPiece {
-            self.board.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
-        }
+
     }
 }

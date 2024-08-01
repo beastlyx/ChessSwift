@@ -5,7 +5,7 @@ class Board: ObservableObject {
     @Published var board: [[GamePiece?]] = Array(repeating: Array(repeating: nil, count: 8), count: 8)
     @Published var moveLog: [MoveLog] = []
     @Published var undoneMoves = BoardState()
-    @Published var capturedPieces: CapturedPieces
+    var capturedPieces: CapturedPieces
     var blackKingPosition: (Int, Int)
     var whiteKingPosition: (Int, Int)
     var test: Bool
@@ -159,10 +159,10 @@ class Board: ObservableObject {
         if index < logCount {
             var movesToUndo = logCount - 1 - index
             while !self.getMoveLog().isEmpty && movesToUndo > 0 {
-                let move = self.getMoveLog().last
-                if let capturedPiece = move?.capturedPiece {
-                    self.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
-                }
+//                let move = self.getMoveLog().last
+//                if let capturedPiece = move?.capturedPiece {
+//                    self.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
+//                }
                 UndoMove(board: self).undo()
                 movesToUndo -= 1
             }
@@ -193,10 +193,10 @@ class Board: ObservableObject {
     
     func undoMove(selectedMoveIndex: Int?) -> Int? {
         if !self.getMoveLog().isEmpty {
-            let move = self.getMoveLog().last
-            if let capturedPiece = move?.capturedPiece {
-                self.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
-            }
+//            let move = self.getMoveLog().last
+//            if let capturedPiece = move?.capturedPiece {
+//                self.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
+//            }
             UndoMove(board: self).undo()
             
             var index = self.getMoveLog().count - 1

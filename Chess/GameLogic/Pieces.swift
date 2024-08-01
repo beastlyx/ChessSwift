@@ -40,7 +40,7 @@ class GamePiece: Hashable {
     }
     
     func getImagePath() -> String {
-        return "\(color)_\(pieceType).png"
+        return "\(color)-\(pieceType).png"
     }
     
     func setLegalMoves(board: Board) -> [(Int, Int)] {
