@@ -20,10 +20,10 @@ struct MainMenuView: View {
 //                }
 //                .padding()
 //
-//                NavigationLink(destination: PlayAgainstPlayerView()) {
-//                    Text("Play Against Player (comming soon)")
-//                }
-//                .padding()
+                NavigationLink(destination: PlayAgainstPlayerView()) {
+                    Text("Play Against Player (comming soon)")
+                }
+                .padding()
 
                 NavigationLink(destination: ExplorerView()) {
                     Text("Explorer")
