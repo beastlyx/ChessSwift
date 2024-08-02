@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainMenuView: View {
+    @ObservedObject var matchManager: MatchManager
     var body: some View {
         NavigationView {
             VStack {
@@ -20,7 +21,7 @@ struct MainMenuView: View {
 //                }
 //                .padding()
 //
-                NavigationLink(destination: PlayerVersusPlayerView()) {
+                NavigationLink(destination: PlayerVersusPlayerView(matchManager: MatchManager())) {
                     Text("Play Against Player (comming soon)")
                 }
                 .padding()
@@ -45,5 +46,5 @@ struct MainMenuView: View {
 }
 
 #Preview {
-    MainMenuView()
+    MainMenuView(matchManager: MatchManager())
 }

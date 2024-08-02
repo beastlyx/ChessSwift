@@ -7,31 +7,87 @@
 
 import SwiftUI
 
+//struct PlayerVersusPlayerView: View {
+//    @StateObject private var chessServer = ChessServer()
+//    @StateObject private var chessClient1 = ChessClient(flipped: false, isWhite: true)
+//    @StateObject private var chessClient2 = ChessClient(flipped: true, isWhite: false)
+//
+//    var body: some View {
+//        VStack {
+//            ServerView(chessServer: chessServer)
+//            Divider()
+//            HStack {
+//                ClientView(chessClient: chessClient1, flipped: $chessClient1.flipped, isWhite: $chessClient1.isWhite)
+//                Divider()
+//                ClientView(chessClient: chessClient2, flipped: $chessClient2.flipped, isWhite: $chessClient2.isWhite)
+//            }
+//        }
+//        .padding()
+//        .onAppear {
+//            chessServer.startListening()
+//            chessClient1.connectToServer()
+//            chessClient2.connectToServer()
+//        }
+//        .onChange(of: chessServer.currentTurn) { newTurn in
+//            chessClient1.isClientTurn.toggle()
+//            chessClient2.isClientTurn.toggle()
+//        }
+//    }
+//}
 struct PlayerVersusPlayerView: View {
-    @StateObject private var chessServer = ChessServer()
-    @StateObject private var chessClient1 = ChessClient(flipped: false, isWhite: true)
-    @StateObject private var chessClient2 = ChessClient(flipped: true, isWhite: false)
-
+//    @StateObject private var chessClient = ChessClient()
+//    
+//    var body: some View {
+//        VStack {
+//            if chessClient.isConnected {
+//                if chessClient.isWhite {
+//                    Text("You are playing as White")
+//                } else {
+//                    Text("You are playing as Black")
+//                }
+//                ClientView(chessClient: chessClient, flipped: $chessClient.flipped, isWhite: $chessClient.isWhite)
+//            } else {
+//                Text("Connecting to server...")
+//                    .padding()
+//            }
+//        }
+//        .onAppear {
+//            chessClient.connectToServer()
+//        }
+//    }
+    
+    @ObservedObject var matchManager: MatchManager
+    
     var body: some View {
         VStack {
-            ServerView(chessServer: chessServer)
-            Divider()
-            HStack {
-                ClientView(chessClient: chessClient1, flipped: $chessClient1.flipped, isWhite: $chessClient1.isWhite)
-                Divider()
-                ClientView(chessClient: chessClient2, flipped: $chessClient2.flipped, isWhite: $chessClient2.isWhite)
+            Button {
+                matchManager.startMatchmaking()
+            } label: {
+                Text("Play")
+                    .foregroundColor(Color.white)
+                    .font(.largeTitle)
+                    .bold()
             }
+            .disabled(matchManager.authenticationState != .authenticated || matchManager.inGame)
+            .padding(.vertical, 20)
+            .padding(.horizontal, 100)
+            .background(
+                Capsule(style: .circular)
+                    .fill(matchManager.authenticationState != .authenticated || matchManager.inGame ? Color.gray : Color.blue)
+            )
+            
+            Text(matchManager.authenticationState.rawValue)
+                .font(.headline.weight(.semibold))
+                .foregroundColor(Color.primary)
+            Spacer()
         }
-        .padding()
-        .onAppear {
-            chessServer.startListening()
-            chessClient1.connectToServer()
-            chessClient2.connectToServer()
-        }
-        .onChange(of: chessServer.currentTurn) { newTurn in
-            chessClient1.isClientTurn.toggle()
-            chessClient2.isClientTurn.toggle()
-        }
+        .background()
+        //Image ??
+//        .resizable()
+//        .scaledToFill()
+//        .scaleEffect(1.1)
+//        .ignoresSafeArea()
+        
     }
 }
 
@@ -341,7 +397,5 @@ struct NewChessPiecesView: View {
 }
 
 #Preview {
-    PlayerVersusPlayerView()
+    PlayerVersusPlayerView(matchManager: MatchManager())
 }
-
-
