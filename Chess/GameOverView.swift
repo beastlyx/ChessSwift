@@ -19,7 +19,7 @@ struct GameOverView: View {
     //        .scaledToFill()
     //        .padding(.horizontal, 70)
     //        .padding(.vertical)
-            Text("Game over by checkmate? stalemate? draw?")
+            Text("Game over by \(matchManager.message)")
                 .font(.largeTitle)
                 .bold()
                 .foregroundColor(Color.primary)

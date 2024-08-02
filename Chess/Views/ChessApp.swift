@@ -11,7 +11,7 @@ import SwiftUI
 struct ChessApp: App {
     var body: some Scene {
         WindowGroup {
-            MainMenuView(matchManager: MatchManager())
+            ContentView(matchManager: MatchManager())
         }
     }
 }

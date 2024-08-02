@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A93A650E2C5C556E00010333 /* PVPMoveLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */; };
+		A93A65122C5D978200010333 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A65112C5D978200010333 /* MenuView.swift */; };
 		A941B39E2C5BEC130007E1FD /* ChessClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226D2C5B293E00810B4E /* ChessClient.swift */; };
 		A941B3A02C5BEC7C0007E1FD /* MoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A941B39F2C5BEC7C0007E1FD /* MoveData.swift */; };
 		A941B3A52C5BEF030007E1FD /* PlayerVersusPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */; };
@@ -58,6 +59,7 @@
 
 /* Begin PBXFileReference section */
 		A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PVPMoveLogView.swift; sourceTree = "<group>"; };
+		A93A65112C5D978200010333 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		A941B39F2C5BEC7C0007E1FD /* MoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveData.swift; sourceTree = "<group>"; };
 		A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerVersusPlayerView.swift; sourceTree = "<group>"; };
 		A984EEC52C5AF9B60006FB92 /* AboutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 				AB4B64402C5CA4FD0092A3F0 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */,
 				AB4B64422C5CA65A0092A3F0 /* MatchManager+GKMatchDelegate.swift */,
 				AB4B64442C5CA9D00092A3F0 /* GameView.swift */,
+				A93A65112C5D978200010333 /* MenuView.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -313,6 +316,7 @@
 				AB4B64382C5C94E10092A3F0 /* Misc.swift in Sources */,
 				A9FD36EA2C530585003473BA /* MoveLog.swift in Sources */,
 				AB3A22672C5B264700810B4E /* ChessPiecesView.swift in Sources */,
+				A93A65122C5D978200010333 /* MenuView.swift in Sources */,
 				A941B39E2C5BEC130007E1FD /* ChessClient.swift in Sources */,
 				A9FD36D42C52E653003473BA /* ExplorerView.swift in Sources */,
 				A984EEC62C5AF9B60006FB92 /* AboutView.swift in Sources */,

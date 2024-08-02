@@ -90,138 +90,138 @@ struct PlayerVersusPlayerView: View {
         
     }
 }
-
-struct ServerView: View {
-    @ObservedObject var chessServer: ChessServer
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text(chessServer.isListening ? "Server is Listening" : "Server Stopped")
-            Button(chessServer.isListening ? "Stop Server" : "Start Server") {
-                if chessServer.isListening {
-                    chessServer.stopListening()
-                } else {
-                    chessServer.startListening()
-                }
-            }
-            ScrollView {
-                ForEach(chessServer.statusMessages, id: \.self) { message in
-                    Text(message)
-                        .padding(.bottom, 2)
-                        .frame(alignment: .leading)
-                        .font(.system(size: 16).bold())
-                        .foregroundColor(Color.black)
-                    Divider()
-                }
-            }
-            .frame(alignment: .leading)
-        }
-        .padding()
-        .frame(width: 400, alignment: .leading)
-        .background(Color.gray.opacity(0.5))
-        .cornerRadius(10)
-    }
-}
-
-struct ClientView: View {
-    @ObservedObject var chessClient: ChessClient
-    @State private var selectedPiece: GamePiece?
-    @State private var legalMoves: [(Int, Int)] = []
-    @State private var legalCaptures: [(Int, Int)] = []
-    @State private var selectedPosition: (Int, Int)?
-    @State private var isMate: Bool = false
-    @Binding var flipped: Bool
-    @Binding var isWhite: Bool
-    @State private var selectedMoveIndex: Int? = nil
-    @State private var showingPromotionDialog = false
-    @State private var promotionDetails: (Int, Int, String, (GamePiece) -> Void)?
-    
-    var body: some View {
-        VStack {
-            Text("Client UUID: \(chessClient.uuidString)")
-            if chessClient.isConnected {
-                Text("Connected to Server")
-            } else {
-                Text("Not Connected")
-                Button("Connect to Server") {
-                    chessClient.connectToServer()
-                }
-            }
-            
-            HStack(spacing: 0) {
-                CapturedPiecesView(capturedPieces: chessClient.board.capturedPieces.getWhiteCapturedPieces())
-                Spacer()
-                if let pointDifference = pointDifference(), pointDifference > 0 {
-                    Text("+\(pointDifference)")
-                        .foregroundColor(Color.black.opacity(0.5))
-                        .padding(.leading, 5)
-                }
-            }
-            .frame(height: 50)
-            .padding(.horizontal, 10)
-            ZStack {
-                let size = CGFloat(400)
-                ChessBorderView(squareSize: size / 8, color1: .white, color2: Color(red: 218/255, green: 140/255, blue: 44/255), flipped: flipped)
-                NewChessPiecesView(board: chessClient.board, squareSize: (size * 0.95) / 8, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $isWhite, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, isClientTurn: $chessClient.isClientTurn, flipped: $flipped, movePieceCallback: { oldRow, oldCol, newRow, newCol, isPromotion, pieceType in
-                    if chessClient.isClientTurn {
-                        chessClient.sendMove(oldRow: oldRow, oldCol: oldCol, newRow: newRow, newCol: newCol, isPromotion: isPromotion, pieceType: pieceType)
-                    }
-                })
-            }
-            .frame(width: CGFloat(400), height: CGFloat(400))
-            HStack(spacing: 0) {
-                CapturedPiecesView(capturedPieces: chessClient.board.capturedPieces.getBlackCapturedPieces())
-                Spacer()
-                if let pointDifference = pointDifference(), pointDifference < 0 {
-                    Text("+\(-pointDifference)")
-                        .foregroundColor(Color.black.opacity(0.5))
-                        .padding(.leading, 5)
-                }
-            }
-            .frame(height: 50)
-            .padding(.horizontal, 10)
-            
-            PVPMoveLogView(board: chessClient.board)
-                .frame(width: 230, height: 200)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
-                .padding(.bottom, 20)
-                .padding(.trailing, 20)
-                .padding(.leading, 20)
-            
-                .onReceive(chessClient.board.promotionPublisher) { details in
-                    if chessClient.isClientTurn { // Check if it's the client's turn
-                        promotionDetails = details
-                        showingPromotionDialog = true
-                    }
-                }
-        }
-        .padding()
-        if chessClient.isClientTurn && showingPromotionDialog, let details = promotionDetails {
-            PromotionDialogOverlayView(details: details, size: CGFloat(400), onSelect: { piece in
-                details.3(piece)
-                showingPromotionDialog = false
-            })
-        }
-    }
-    
-    private func pointDifference() -> Int? {
-        let whitePoints = chessClient.board.capturedPieces.calculateWhitePoints()
-        let blackPoints = chessClient.board.capturedPieces.calculateBlackPoints()
-        return whitePoints - blackPoints
-    }
-    
-//    private func reset() {
-//        chessClient.board.reset()
-//        selectedPiece = nil
-//        legalMoves = []
-//        legalCaptures = []
-//        selectedPosition = nil
-//        whiteMove = true
-//        isMate = false
-//        selectedMoveIndex = nil
+//
+//struct ServerView: View {
+//    @ObservedObject var chessServer: ChessServer
+//
+//    var body: some View {
+//        VStack(alignment: .leading) {
+//            Text(chessServer.isListening ? "Server is Listening" : "Server Stopped")
+//            Button(chessServer.isListening ? "Stop Server" : "Start Server") {
+//                if chessServer.isListening {
+//                    chessServer.stopListening()
+//                } else {
+//                    chessServer.startListening()
+//                }
+//            }
+//            ScrollView {
+//                ForEach(chessServer.statusMessages, id: \.self) { message in
+//                    Text(message)
+//                        .padding(.bottom, 2)
+//                        .frame(alignment: .leading)
+//                        .font(.system(size: 16).bold())
+//                        .foregroundColor(Color.black)
+//                    Divider()
+//                }
+//            }
+//            .frame(alignment: .leading)
+//        }
+//        .padding()
+//        .frame(width: 400, alignment: .leading)
+//        .background(Color.gray.opacity(0.5))
+//        .cornerRadius(10)
 //    }
-}
+//}
+//
+//struct ClientView: View {
+//    @ObservedObject var chessClient: ChessClient
+//    @State private var selectedPiece: GamePiece?
+//    @State private var legalMoves: [(Int, Int)] = []
+//    @State private var legalCaptures: [(Int, Int)] = []
+//    @State private var selectedPosition: (Int, Int)?
+//    @State private var isMate: Bool = false
+//    @Binding var flipped: Bool
+//    @Binding var isWhite: Bool
+//    @State private var selectedMoveIndex: Int? = nil
+//    @State private var showingPromotionDialog = false
+//    @State private var promotionDetails: (Int, Int, String, (GamePiece) -> Void)?
+//    
+//    var body: some View {
+//        VStack {
+//            Text("Client UUID: \(chessClient.uuidString)")
+//            if chessClient.isConnected {
+//                Text("Connected to Server")
+//            } else {
+//                Text("Not Connected")
+//                Button("Connect to Server") {
+//                    chessClient.connectToServer()
+//                }
+//            }
+//            
+//            HStack(spacing: 0) {
+//                CapturedPiecesView(capturedPieces: chessClient.board.capturedPieces.getWhiteCapturedPieces())
+//                Spacer()
+//                if let pointDifference = pointDifference(), pointDifference > 0 {
+//                    Text("+\(pointDifference)")
+//                        .foregroundColor(Color.black.opacity(0.5))
+//                        .padding(.leading, 5)
+//                }
+//            }
+//            .frame(height: 50)
+//            .padding(.horizontal, 10)
+//            ZStack {
+//                let size = CGFloat(400)
+//                ChessBorderView(squareSize: size / 8, color1: .white, color2: Color(red: 218/255, green: 140/255, blue: 44/255), flipped: flipped)
+//                NewChessPiecesView(board: chessClient.board, squareSize: (size * 0.95) / 8, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $isWhite, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, isClientTurn: $chessClient.isClientTurn, flipped: $flipped, movePieceCallback: { oldRow, oldCol, newRow, newCol, isPromotion, pieceType in
+//                    if chessClient.isClientTurn {
+//                        chessClient.sendMove(oldRow: oldRow, oldCol: oldCol, newRow: newRow, newCol: newCol, isPromotion: isPromotion, pieceType: pieceType)
+//                    }
+//                })
+//            }
+//            .frame(width: CGFloat(400), height: CGFloat(400))
+//            HStack(spacing: 0) {
+//                CapturedPiecesView(capturedPieces: chessClient.board.capturedPieces.getBlackCapturedPieces())
+//                Spacer()
+//                if let pointDifference = pointDifference(), pointDifference < 0 {
+//                    Text("+\(-pointDifference)")
+//                        .foregroundColor(Color.black.opacity(0.5))
+//                        .padding(.leading, 5)
+//                }
+//            }
+//            .frame(height: 50)
+//            .padding(.horizontal, 10)
+//            
+//            PVPMoveLogView(board: chessClient.board)
+//                .frame(width: 230, height: 200)
+//                .background(Color.gray.opacity(0.1))
+//                .cornerRadius(10)
+//                .padding(.bottom, 20)
+//                .padding(.trailing, 20)
+//                .padding(.leading, 20)
+//            
+//                .onReceive(chessClient.board.promotionPublisher) { details in
+//                    if chessClient.isClientTurn { // Check if it's the client's turn
+//                        promotionDetails = details
+//                        showingPromotionDialog = true
+//                    }
+//                }
+//        }
+//        .padding()
+//        if chessClient.isClientTurn && showingPromotionDialog, let details = promotionDetails {
+//            PromotionDialogOverlayView(details: details, size: CGFloat(400), onSelect: { piece in
+//                details.3(piece)
+//                showingPromotionDialog = false
+//            })
+//        }
+//    }
+//    
+//    private func pointDifference() -> Int? {
+//        let whitePoints = chessClient.board.capturedPieces.calculateWhitePoints()
+//        let blackPoints = chessClient.board.capturedPieces.calculateBlackPoints()
+//        return whitePoints - blackPoints
+//    }
+//    
+////    private func reset() {
+////        chessClient.board.reset()
+////        selectedPiece = nil
+////        legalMoves = []
+////        legalCaptures = []
+////        selectedPosition = nil
+////        whiteMove = true
+////        isMate = false
+////        selectedMoveIndex = nil
+////    }
+//}
 
 
 struct NewChessPiecesView: View {

@@ -14,7 +14,7 @@ extension MatchManager: GKMatchmakerViewControllerDelegate {
         startGame(newMatch: match)
     }
     
-    func matchmakerViewController(_ viewController: GKMatchmakerViewController, didFailWithError error: any Error) {
+    func matchmakerViewController(_ viewController: GKMatchmakerViewController, didFailWithError error: Error) {
         viewController.dismiss(animated: true)
     }
     

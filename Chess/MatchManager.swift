@@ -10,15 +10,17 @@ import GameKit
 
 
 class MatchManager: NSObject, ObservableObject {
+    @Published var board = Board()
     @Published var inGame = false
     @Published var isGameOver = false
     @Published var authenticationState = PlayerAuthState.authenticating
     
-    @Published var currentTurn = false
-    @Published var remainingTime = maxTimeRemaining
+    @Published var message = "checkmate"
+    @Published var currentTurn = true
+    @Published var remainingTimeWhite = maxTimeRemaining
+    @Published var remainingTimeBlack = maxTimeRemaining
     @Published var isTimeKeeper = false
-    @Published var lastReceivedMove = MoveData(oldRow: 0, oldCol: 0, newRow: 0, newCol: 0, isPromotion: false, pieceType: "")
-    
+    @Published var lastReceivedMove: MoveData?
     
     var match: GKMatch?
     var otherPlayer: GKPlayer?
@@ -40,6 +42,7 @@ class MatchManager: NSObject, ObservableObject {
             if let error = e {
                 authenticationState = .error
                 print(error.localizedDescription)
+                return
             }
             
             if localPlayer.isAuthenticated {
@@ -52,10 +55,7 @@ class MatchManager: NSObject, ObservableObject {
             else {
                 authenticationState = .unauthenticated
             }
-            
         }
-        
-        
     }
     
     func startMatchmaking() {
@@ -74,30 +74,53 @@ class MatchManager: NSObject, ObservableObject {
         match?.delegate = self
         otherPlayer = match?.players.first
         
-        sendString("began:\(playerUUIDKey)")
+        inGame = true
+        isGameOver = false
+        
+        // Determine the turn
+        currentTurn = GKLocalPlayer.local.gamePlayerID < (otherPlayer?.gamePlayerID ?? "")
     }
     
-    func receivedString(_ message: String) {
-        let messageSplit = message.split(separator: ":")
-        guard let messagePrefix = messageSplit.first else { return }
-        
-        let parameter = String(messageSplit.last ?? "")
-        
-        switch messagePrefix {
-        case "began":
-            if playerUUIDKey == parameter {
-                playerUUIDKey = UUID().uuidString
-                sendString("began:\(playerUUIDKey)")
-            }
-            
-            currentTurn = playerUUIDKey < parameter
-            inGame = true
-            
-            if isTimeKeeper {
-                countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-            }
-        default:
-            break
+//    func receivedString(_ message: String) {
+//        let messageSplit = message.split(separator: ":")
+//        guard let messagePrefix = messageSplit.first else { return }
+//        
+//        let parameter = String(messageSplit.last ?? "")
+//        
+//        switch messagePrefix {
+//        case "began":
+//            if playerUUIDKey == parameter {
+//                playerUUIDKey = UUID().uuidString
+//                sendString("began:\(playerUUIDKey)")
+//                break
+//            }
+//            
+//            currentTurn = playerUUIDKey < parameter
+//            inGame = true
+//            isTimeKeeper = true
+//            
+//            if isTimeKeeper {
+//                countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+//            }
+//        default:
+//            break
+//        }
+//    }
+    
+    func sendMove(_ moveData: MoveData) {
+        do {
+            let data = try JSONEncoder().encode(moveData)
+            try match?.sendData(toAllPlayers: data, with: .reliable)
+        } catch {
+            print(error)
+        }
+    }
+    
+    func receivedMove(_ moveData: MoveData) {
+        DispatchQueue.main.async { // Ensure UI updates are performed on the main thread
+            self.board.applyMove(from: (moveData.oldRow, moveData.oldCol), to: (moveData.newRow, moveData.newCol), isPromotion: moveData.isPromotion, pieceType: moveData.pieceType)
+            self.lastReceivedMove = moveData
+            self.currentTurn.toggle()
         }
     }
 }

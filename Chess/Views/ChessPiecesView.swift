@@ -1,9 +1,3 @@
-//
-//  ChessPiecesView.swift
-//  Chess
-//
-//  Created by Borys Banaszkiewicz on 7/31/24.
-//
 
 import SwiftUI
 
@@ -20,11 +14,11 @@ struct ChessPiecesView: View {
     @State private var isPieceSelected = false
     @State private var dragOffset = CGSize.zero
     @State private var draggedPiece: GamePiece?
+    @State private var dragPosition: CGPoint = .zero
     @State private var initialPosition: (Int, Int)?
     @State private var enPassantPosition: (Int, Int)?
     @State private var glowOpacity = 0.3
-//    var flipped: Bool
-    
+    var flipped: Bool
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     let checkFeedback = UIImpactFeedbackGenerator(style: .heavy)
     
@@ -33,10 +27,10 @@ struct ChessPiecesView: View {
             if lastMove.isCheck == true {
                 ZStack {
                     let (kingRow, kingCol) = self.board.getKingPosition(color: whiteMove ? "white" : "black")
-//                    let (displayRow, displayCol) = flipped ? (7 - kingRow, 7 - kingCol) : (kingRow, kingCol)
+                    let (displayRow, displayCol) = flipped ? (7 - kingRow, 7 - kingCol) : (kingRow, kingCol)
                     RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
                         .frame(width: squareSize, height: squareSize)
-                        .position(x: CGFloat(kingCol) * (squareSize) + (squareSize / 2) * 1.43, y: CGFloat(kingRow) * (squareSize) + (squareSize / 2) * 1.44)
+                        .position(x: CGFloat(displayCol) * (squareSize) + (squareSize / 2) * 1.43, y: CGFloat(displayRow) * (squareSize) + (squareSize / 2) * 1.44)
                         .opacity(glowOpacity)
                         .onAppear {
                             withAnimation(Animation.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
@@ -54,54 +48,60 @@ struct ChessPiecesView: View {
             ForEach(0..<8, id: \.self) { row in
                 HStack(spacing: 0) {
                     ForEach(0..<8, id: \.self) { col in
-//                        let displayRow = flipped ? 7 - row : row
-//                        let displayCol = flipped ? 7 - col : col
+                        let displayRow = flipped ? 7 - row : row
+                        let displayCol = flipped ? 7 - col : col
                         ZStack {
-                            if let ep = enPassantPosition, ep == (row, col) {
+                            if let ep = enPassantPosition, ep == (displayRow, displayCol) {
                                 RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                     .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
-//                                    .opacity(0.8)
                                 
                             }
-                            if legalMoves.contains(where: { $0 == (row, col)}) {
-                                if legalCaptures.contains(where: { $0 == (row, col) }) {
+                            if legalMoves.contains(where: { $0 == (displayRow, displayCol)}) {
+                                if legalCaptures.contains(where: { $0 == (displayRow, displayCol) }) {
                                     RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                         .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
-//                                        .opacity(0.8)
                                         .onTapGesture {
                                             feedbackGenerator.impactOccurred()
-                                            movePiece(to: (row, col))
+                                            movePiece(to: (displayRow, displayCol))
                                         }
                                 } else {
                                     Circle()
-                                        .fill(Color.gray.opacity(0.9))
+                                        .fill(Color.blue.opacity(0.5))
                                         .shadow(color: Color.black.opacity(0.3), radius: 4, x: 2, y: 2)
-                                        .frame(width: squareSize * 0.4, height: squareSize * 0.4)
+                                        .frame(width: squareSize * 0.3, height: squareSize * 0.3)
                                         .onTapGesture {
                                             feedbackGenerator.impactOccurred()
-                                            movePiece(to: (row, col))
+                                            movePiece(to: (displayRow, displayCol))
                                         }
                                 }
                             }
-                            if let piece = board.getPiece(row: row, col: col) {
+                            if let piece = board.getPiece(row: displayRow, col: displayCol) {
                                 Image(uiImage: piece.img!)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: squareSize, height: squareSize)
                                     .scaledToFit()
-                                    .scaleEffect(isSelectedPosition(row: row, col: col) ? 1.2 : 1.0)
+                                    .scaleEffect(isSelectedPosition(row: displayRow, col: displayCol) ? 1.2 : 1.0)
                                     .animation(.easeInOut(duration: 0.2), value: isPieceSelected)
                                     .shadow(color: Color.black.opacity(0.4), radius: 2, x: 1, y: 1)
+                                    .offset(
+                                        x: selectedPiece == piece ? dragOffset.width : 0,
+                                        y: selectedPiece == piece ? dragOffset.height : 0
+                                    )
+
                                     .rotationEffect(isMate && piece.pieceType == "king" && (piece.color == "white" && whiteMove || piece.color == "black" && !whiteMove) ? .degrees(-90) : .degrees(0))
                                     .onTapGesture {
                                         feedbackGenerator.impactOccurred()
-                                        if legalCaptures.contains(where: { $0 == (row, col) }) {
-                                            movePiece(to: (row, col))
+                                        if legalCaptures.contains(where: { $0 == (displayRow, displayCol) }) {
+                                            movePiece(to: (displayRow, displayCol))
                                         } else {
-                                            selectPiece(piece: piece, at: (row, col))
+                                            selectPiece(piece: piece, at: (displayRow, displayCol))
                                         }
                                     }
+                                    
+
                             }
+                            
                         }
                         .frame(width: squareSize, height: squareSize)
                         .contentShape(Rectangle())
@@ -154,12 +154,21 @@ struct ChessPiecesView: View {
     }
 
     private func movePiece(to newPos: (Int, Int)) {
-        guard let piece = selectedPiece, let _ = selectedPosition else { return }
+        guard let piece = selectedPiece, let currentPosition = selectedPosition else { return }
+        
+        let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
+        let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
+
+        dragOffset = CGSize(width: -colDiff, height: -rowDiff)
+
         board.movePiece(piece: piece, newPosition: newPos)
+        
+        withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
+            dragOffset = .zero
+        }
         board.undoneMoves.reset()
-
+        
         selectedMoveIndex = board.getMoveLog().count - 1
-
         isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
         
         whiteMove.toggle()
@@ -168,8 +177,7 @@ struct ChessPiecesView: View {
         legalMoves = []
         legalCaptures = []
         isPieceSelected = false
-        dragOffset = .zero
-        draggedPiece = nil
         enPassantPosition = nil
+        
     }
 }

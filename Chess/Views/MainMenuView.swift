@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainMenuView: View {
     @ObservedObject var matchManager: MatchManager
+        
     var body: some View {
         NavigationView {
             VStack {
@@ -16,12 +17,8 @@ struct MainMenuView: View {
                     .font(.largeTitle)
                     .padding()
 
-//                NavigationLink(destination: PlayAgainstBotView()) {
-//                    Text("Play Against Bot (comming soon)")
-//                }
-//                .padding()
-//
-                NavigationLink(destination: PlayerVersusPlayerView(matchManager: MatchManager())) {
+                .background()
+                NavigationLink(destination: MenuView(matchManager: matchManager)) {
                     Text("Play Against Player (comming soon)")
                 }
                 .padding()
