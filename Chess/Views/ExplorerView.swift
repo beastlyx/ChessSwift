@@ -20,6 +20,7 @@ struct ExplorerView: View {
     @State private var lightSquareColor: Color = UserDefaults.standard.color(forKey: "lightSquareColor") ?? .white
     @State private var darkSquareColor: Color = UserDefaults.standard.color(forKey: "darkSquareColor") ?? Color(red: 218/255, green: 140/255, blue: 44/255)
     @State private var showingEditBoardView = false
+    @State private var flipped = false
     
     var body: some View {
         NavigationStack {
@@ -42,10 +43,10 @@ struct ExplorerView: View {
                     
                     ZStack {
                         let squareSize = size / 8
-                        ChessBoarderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor)
+                        ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: flipped)
                             .frame(width: size, height: size)
                         
-                        ChessPiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex)
+                        ChessPiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex)//, flipped: flipped)
                             .frame(width: size, height: size)
                             .contentShape(Rectangle())
                             .onTapGesture {

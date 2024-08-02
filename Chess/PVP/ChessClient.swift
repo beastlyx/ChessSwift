@@ -1,74 +1,82 @@
 import Foundation
 import Network
 
-class ChessClient {
+class ChessClient: ObservableObject {
     private var connection: NWConnection?
-    private var gameState: Board
+    @Published var isConnected = false
+    @Published var board = Board()
+    @Published var flipped = false
+    @Published var isWhite = false
+    @Published var isClientTurn: Bool
     
-    init() {
-        self.gameState = Board()
+    let uuidString = UUID().uuidString
+
+    init(flipped: Bool, isWhite: Bool) {
+        self.flipped = flipped
+        self.isWhite = isWhite
+        self.isClientTurn = isWhite
     }
-    
+
     func connectToServer() {
         connection = NWConnection(host: "localhost", port: 8888, using: .tcp)
-        connection?.stateUpdateHandler = { state in
+        connection?.stateUpdateHandler = { [weak self] state in
             switch state {
             case .ready:
-                print("Connected to server")
-                self.receive()
+                DispatchQueue.main.async {
+                    self?.isConnected = true
+                }
+                self?.sendUUID()
+                self?.receive()
             case .failed(let error):
-                print("Connection failed: \(error)")
+                print("Client connection failed: \(error)")
+                DispatchQueue.main.async {
+                    self?.isConnected = false
+                }
             default:
                 break
             }
         }
         connection?.start(queue: .main)
     }
-    
+
+    private func sendUUID() {
+        guard let connection = connection else { return }
+        let data = uuidString.data(using: .utf8)
+        connection.send(content: data, completion: .contentProcessed({ error in
+            if let error = error {
+                print("Failed to send UUID: \(error)")
+            }
+        }))
+    }
+
     private func receive() {
-        connection?.receive(minimumIncompleteLength: 1, maximumLength: 1024) { data, _, isComplete, error in
+        connection?.receive(minimumIncompleteLength: 1, maximumLength: 1024) { [weak self] data, _, isComplete, error in
             if let data = data, !data.isEmpty {
-                self.handleReceivedData(data)
+                self?.handleReceivedData(data)
             }
             if isComplete {
-                print("Connection closed")
+                DispatchQueue.main.async {
+                    self?.isConnected = false
+                }
             } else if error == nil {
-                self.receive()
+                self?.receive()
             }
         }
     }
-    
+
     private func handleReceivedData(_ data: Data) {
         do {
             let moveData = try JSONDecoder().decode(MoveData.self, from: data)
             DispatchQueue.main.async {
-                // Assuming you have a method to convert MoveData back to MoveLog
-                let moveLog = self.convertMoveDataToMoveLog(moveData)
-                self.gameState.applyMove(moveLog)
-                // Optionally: update UI here
+                self.board.applyMove(from: (moveData.oldRow, moveData.oldCol), to: (moveData.newRow, moveData.newCol), isPromotion: moveData.isPromotion, pieceType: moveData.pieceType)
             }
         } catch {
             print("Error decoding received data: \(error)")
         }
     }
 
-    // Helper method to convert MoveData to MoveLog
-    private func convertMoveDataToMoveLog(_ moveData: MoveData) -> MoveLog {
-        // You'll need to adjust this according to how MoveLog is structured and initialized
-        return MoveLog(
-            board: gameState,
-            piece: nil,
-            oldPosition: (moveData.oldPosition.row, moveData.oldPosition.column),
-            newPosition: (moveData.newPosition.row, moveData.newPosition.column),
-            isPromotion: moveData.isPromotion,
-            isCastle: moveData.isCastle,
-            isEnPassant: moveData.isEnPassant,
-            originalPawn: nil // Adjust based on your actual MoveLog initializers
-        )
-    }
-    
-    func sendMove(moveLog: MoveLog) {
-        let moveData = MoveData(from: moveLog)
+    func sendMove(oldRow: Int, oldCol: Int, newRow: Int, newCol: Int, isPromotion: Bool, pieceType: String) {
+        let moveData = MoveData(oldRow: oldRow, oldCol: oldCol, newRow: newRow, newCol: newCol, isPromotion: isPromotion, pieceType: pieceType)
         do {
             let data = try JSONEncoder().encode(moveData)
             connection?.send(content: data, completion: .contentProcessed({ error in
@@ -80,31 +88,4 @@ class ChessClient {
             print("Error encoding move data: \(error)")
         }
     }
-}
-struct MoveData: Codable {
-    var oldPosition: Position
-    var newPosition: Position
-    var isPromotion: Bool
-    var isCastle: Bool
-    var isEnPassant: Bool
-    var promotionPiece: String?
-    
-    init(from moveLog: MoveLog) {
-        self.oldPosition = Position(row: moveLog.oldPosition.0, column: moveLog.oldPosition.1)
-        self.newPosition = Position(row: moveLog.newPosition.0, column: moveLog.newPosition.1)
-        self.isPromotion = moveLog.isPromotion
-        self.isCastle = moveLog.isCastle
-        self.isEnPassant = moveLog.isEnPassant
-        
-        if moveLog.isPromotion == true {
-            self.promotionPiece = moveLog.piece.pieceType
-        } else {
-            self.promotionPiece = ""
-        }
-    }
-}
-
-struct Position: Codable {
-    var row: Int
-    var column: Int
 }

@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A93A650E2C5C556E00010333 /* PVPMoveLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */; };
+		A941B39E2C5BEC130007E1FD /* ChessClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226D2C5B293E00810B4E /* ChessClient.swift */; };
+		A941B3A02C5BEC7C0007E1FD /* MoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A941B39F2C5BEC7C0007E1FD /* MoveData.swift */; };
+		A941B3A52C5BEF030007E1FD /* PlayerVersusPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */; };
+		A941B3A72C5BF1BA0007E1FD /* ChessServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226F2C5B294A00810B4E /* ChessServer.swift */; };
 		A984EEC62C5AF9B60006FB92 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A984EEC52C5AF9B60006FB92 /* AboutView.swift */; };
 		A984EEC82C5B11800006FB92 /* EditBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A984EEC72C5B11800006FB92 /* EditBoardView.swift */; };
 		A9FD36D22C52E653003473BA /* ChessApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FD36D12C52E653003473BA /* ChessApp.swift */; };
@@ -24,18 +29,18 @@
 		AB09055F2C588D0E00BFDC9B /* MainMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB09055E2C588D0E00BFDC9B /* MainMenuView.swift */; };
 		AB0905612C58946000BFDC9B /* AnalyzeGamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0905602C58946000BFDC9B /* AnalyzeGamesView.swift */; };
 		AB3A225A2C5B1BDA00810B4E /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22592C5B1BDA00810B4E /* UserDefaults.swift */; };
-		AB3A225D2C5B1E0600810B4E /* PlayAgainstPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A225C2C5B1E0600810B4E /* PlayAgainstPlayerView.swift */; };
 		AB3A225F2C5B24DA00810B4E /* CapturedPiecesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A225E2C5B24DA00810B4E /* CapturedPiecesView.swift */; };
 		AB3A22612C5B25D100810B4E /* MoveLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22602C5B25D100810B4E /* MoveLogView.swift */; };
 		AB3A22632C5B25F000810B4E /* ChessBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22622C5B25F000810B4E /* ChessBoardView.swift */; };
 		AB3A22652C5B261400810B4E /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22642C5B261400810B4E /* SideMenuView.swift */; };
 		AB3A22672C5B264700810B4E /* ChessPiecesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22662C5B264700810B4E /* ChessPiecesView.swift */; };
 		AB3A22692C5B266C00810B4E /* PromotionDialogOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22682C5B266C00810B4E /* PromotionDialogOverlayView.swift */; };
-		AB3A226E2C5B293E00810B4E /* ChessClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226D2C5B293E00810B4E /* ChessClient.swift */; };
-		AB3A22702C5B294A00810B4E /* ChessServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226F2C5B294A00810B4E /* ChessServer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PVPMoveLogView.swift; sourceTree = "<group>"; };
+		A941B39F2C5BEC7C0007E1FD /* MoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveData.swift; sourceTree = "<group>"; };
+		A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerVersusPlayerView.swift; sourceTree = "<group>"; };
 		A984EEC52C5AF9B60006FB92 /* AboutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		A984EEC72C5B11800006FB92 /* EditBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBoardView.swift; sourceTree = "<group>"; };
 		A9FD36CE2C52E653003473BA /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -54,7 +59,6 @@
 		AB09055E2C588D0E00BFDC9B /* MainMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuView.swift; sourceTree = "<group>"; };
 		AB0905602C58946000BFDC9B /* AnalyzeGamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeGamesView.swift; sourceTree = "<group>"; };
 		AB3A22592C5B1BDA00810B4E /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
-		AB3A225C2C5B1E0600810B4E /* PlayAgainstPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayAgainstPlayerView.swift; sourceTree = "<group>"; };
 		AB3A225E2C5B24DA00810B4E /* CapturedPiecesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturedPiecesView.swift; sourceTree = "<group>"; };
 		AB3A22602C5B25D100810B4E /* MoveLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveLogView.swift; sourceTree = "<group>"; };
 		AB3A22622C5B25F000810B4E /* ChessBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessBoardView.swift; sourceTree = "<group>"; };
@@ -115,6 +119,7 @@
 		AB09055C2C588C9300BFDC9B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */,
 				AB09055E2C588D0E00BFDC9B /* MainMenuView.swift */,
 				A984EEC52C5AF9B60006FB92 /* AboutView.swift */,
 				AB0905602C58946000BFDC9B /* AnalyzeGamesView.swift */,
@@ -128,7 +133,6 @@
 				AB3A22682C5B266C00810B4E /* PromotionDialogOverlayView.swift */,
 				A9FD36D12C52E653003473BA /* ChessApp.swift */,
 				A9FD36D52C52E655003473BA /* Assets.xcassets */,
-				AB3A225C2C5B1E0600810B4E /* PlayAgainstPlayerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -161,6 +165,8 @@
 			children = (
 				AB3A226D2C5B293E00810B4E /* ChessClient.swift */,
 				AB3A226F2C5B294A00810B4E /* ChessServer.swift */,
+				A941B39F2C5BEC7C0007E1FD /* MoveData.swift */,
+				A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */,
 			);
 			path = PVP;
 			sourceTree = "<group>";
@@ -240,7 +246,7 @@
 				AB3A22652C5B261400810B4E /* SideMenuView.swift in Sources */,
 				A9FD36EA2C530585003473BA /* MoveLog.swift in Sources */,
 				AB3A22672C5B264700810B4E /* ChessPiecesView.swift in Sources */,
-				AB3A226E2C5B293E00810B4E /* ChessClient.swift in Sources */,
+				A941B39E2C5BEC130007E1FD /* ChessClient.swift in Sources */,
 				A9FD36D42C52E653003473BA /* ExplorerView.swift in Sources */,
 				A984EEC62C5AF9B60006FB92 /* AboutView.swift in Sources */,
 				A9FD36EC2C5305A8003473BA /* UndoMove.swift in Sources */,
@@ -249,11 +255,13 @@
 				A9FD36E02C52F0FB003473BA /* Pieces.swift in Sources */,
 				A9FD36E42C5304D2003473BA /* CheckConditions.swift in Sources */,
 				AB3A22692C5B266C00810B4E /* PromotionDialogOverlayView.swift in Sources */,
+				A941B3A52C5BEF030007E1FD /* PlayerVersusPlayerView.swift in Sources */,
+				A93A650E2C5C556E00010333 /* PVPMoveLogView.swift in Sources */,
+				A941B3A72C5BF1BA0007E1FD /* ChessServer.swift in Sources */,
 				A9FD36E22C52FF1F003473BA /* Board.swift in Sources */,
 				AB3A225A2C5B1BDA00810B4E /* UserDefaults.swift in Sources */,
-				AB3A225D2C5B1E0600810B4E /* PlayAgainstPlayerView.swift in Sources */,
-				AB3A22702C5B294A00810B4E /* ChessServer.swift in Sources */,
 				AB3A22612C5B25D100810B4E /* MoveLogView.swift in Sources */,
+				A941B3A02C5BEC7C0007E1FD /* MoveData.swift in Sources */,
 				AB3A225F2C5B24DA00810B4E /* CapturedPiecesView.swift in Sources */,
 				A9FD36E82C53055D003473BA /* CapturedPieces.swift in Sources */,
 				A9FD36EE2C530643003473BA /* Chess.swift in Sources */,

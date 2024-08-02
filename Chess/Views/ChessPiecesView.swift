@@ -23,6 +23,7 @@ struct ChessPiecesView: View {
     @State private var initialPosition: (Int, Int)?
     @State private var enPassantPosition: (Int, Int)?
     @State private var glowOpacity = 0.3
+//    var flipped: Bool
     
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     let checkFeedback = UIImpactFeedbackGenerator(style: .heavy)
@@ -32,6 +33,7 @@ struct ChessPiecesView: View {
             if lastMove.isCheck == true {
                 ZStack {
                     let (kingRow, kingCol) = self.board.getKingPosition(color: whiteMove ? "white" : "black")
+//                    let (displayRow, displayCol) = flipped ? (7 - kingRow, 7 - kingCol) : (kingRow, kingCol)
                     RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
                         .frame(width: squareSize, height: squareSize)
                         .position(x: CGFloat(kingCol) * (squareSize) + (squareSize / 2) * 1.43, y: CGFloat(kingRow) * (squareSize) + (squareSize / 2) * 1.44)
@@ -52,6 +54,8 @@ struct ChessPiecesView: View {
             ForEach(0..<8, id: \.self) { row in
                 HStack(spacing: 0) {
                     ForEach(0..<8, id: \.self) { col in
+//                        let displayRow = flipped ? 7 - row : row
+//                        let displayCol = flipped ? 7 - col : col
                         ZStack {
                             if let ep = enPassantPosition, ep == (row, col) {
                                 RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)

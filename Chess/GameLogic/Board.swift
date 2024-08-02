@@ -107,6 +107,34 @@ class Board: ObservableObject {
         }
     }
     
+    func applyMove(from: (Int, Int), to: (Int, Int), isPromotion: Bool, pieceType: String) {
+        if isPromotion == true {
+            if let color = getPiece(row: from.0, col: from.1)?.color {
+                let piece = createPiece(type: pieceType, color: color)
+                makeMove(piece: piece, capturedPiece: getPiece(row: to.0, col: to.1), fromPosition: from, newPosition: to, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: getPiece(row: from.0, col: from.1))
+            }
+        } else {
+            if let piece = getPiece(row: from.0, col: from.1) {
+                movePiece(piece: piece, newPosition: to)
+            }
+        }
+    }
+    
+    private func createPiece(type: String, color: String) -> GamePiece {
+        switch type {
+        case "queen":
+            return Queen(row: 0, col: 0, color: color)
+        case "rook":
+            return Rook(row: 0, col: 0, color: color, id: "\(color)-rook")
+        case "bishop":
+            return Bishop(row: 0, col: 0, color: color)
+        case "knight":
+            return Knight(row: 0, col: 0, color: color)
+        default:
+            return Pawn(row: 0, col: 0, color: color)
+        }
+    }
+    
 //    private func printSnapshot() {
 //        let keys = self.snapshots.keys.sorted()
 //        for key in keys {
