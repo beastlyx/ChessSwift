@@ -108,7 +108,8 @@ struct GameView: View {
                 HStack {
                     Spacer().frame(width: 20)
                     Button {
-                        // TODO: Disconnect from Game - quit button
+                        matchManager.match?.disconnect()
+                        matchManager.resetGame()
                     } label: {
                         Image(systemName: "arrowshape.turn.up.left.circle.fill")
                             .font(.largeTitle)

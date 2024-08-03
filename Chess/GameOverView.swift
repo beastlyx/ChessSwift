@@ -27,7 +27,7 @@ struct GameOverView: View {
             Spacer()
             
             Button {
-                // TODO: Go back to menu
+                matchManager.resetGame()
             } label: {
                 Text("Menu")
                     .foregroundColor(Color.white)

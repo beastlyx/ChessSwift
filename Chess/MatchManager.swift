@@ -127,4 +127,8 @@ class MatchManager: NSObject, ObservableObject {
             self.currentTurn.toggle()
         }
     }
+    
+    func resetGame() {
+        
+    }
 }
