@@ -17,11 +17,11 @@ struct ContentView: View {
             } else if matchManager.inGame {
                 GameView(matchManager: matchManager)
             } else {
-                MainMenuView(matchManager: matchManager)
+                MenuView(matchManager: matchManager)
             }
         }
         .onAppear {
-            matchManager.authentizateUser()
+            matchManager.authenticateUser()
         }
     }
 }

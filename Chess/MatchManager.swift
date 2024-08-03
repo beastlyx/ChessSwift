@@ -33,27 +33,31 @@ class MatchManager: NSObject, ObservableObject {
         return windowScene?.windows.first?.rootViewController
     }
     
-    func authentizateUser() {
-        GKLocalPlayer.local.authenticateHandler = { [self] vc, e in
+    func authenticateUser() {
+        GKLocalPlayer.local.authenticateHandler = { [self] vc, error in
             if let viewController = vc {
                 rootViewController?.present(viewController, animated: true)
                 return
             }
-            if let error = e {
+            if let error = error {
                 authenticationState = .error
-                print(error.localizedDescription)
+//                print(error.localizedDescription)
+                print("Game Center Authentication Error: \(error.localizedDescription)")
                 return
             }
             
             if localPlayer.isAuthenticated {
+                print("Game Center Authentication Successful")
                 if localPlayer.isMultiplayerGamingRestricted {
                     authenticationState = .restricted
+                    print("Multiplayer gaming is restricted.")
                 } else {
                     authenticationState = .authenticated
                 }
             }
             else {
                 authenticationState = .unauthenticated
+                print("Game Center Authentication Failed")
             }
         }
     }
@@ -78,34 +82,34 @@ class MatchManager: NSObject, ObservableObject {
         isGameOver = false
         
         // Determine the turn
-        currentTurn = GKLocalPlayer.local.gamePlayerID < (otherPlayer?.gamePlayerID ?? "")
+        self.currentTurn = GKLocalPlayer.local.playerID < (otherPlayer?.playerID ?? "")
     }
     
-//    func receivedString(_ message: String) {
-//        let messageSplit = message.split(separator: ":")
-//        guard let messagePrefix = messageSplit.first else { return }
-//        
-//        let parameter = String(messageSplit.last ?? "")
-//        
-//        switch messagePrefix {
-//        case "began":
-//            if playerUUIDKey == parameter {
-//                playerUUIDKey = UUID().uuidString
-//                sendString("began:\(playerUUIDKey)")
-//                break
-//            }
-//            
-//            currentTurn = playerUUIDKey < parameter
-//            inGame = true
-//            isTimeKeeper = true
-//            
-//            if isTimeKeeper {
-//                countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-//            }
-//        default:
-//            break
-//        }
-//    }
+    func receivedString(_ message: String) {
+        let messageSplit = message.split(separator: ":")
+        guard let messagePrefix = messageSplit.first else { return }
+        
+        let parameter = String(messageSplit.last ?? "")
+        
+        switch messagePrefix {
+        case "began":
+            if playerUUIDKey == parameter {
+                playerUUIDKey = UUID().uuidString
+                sendString("began:\(playerUUIDKey)")
+                break
+            }
+            
+            currentTurn = playerUUIDKey < parameter
+            inGame = true
+            isTimeKeeper = true
+            
+            if isTimeKeeper {
+                countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+            }
+        default:
+            break
+        }
+    }
     
     func sendMove(_ moveData: MoveData) {
         do {
