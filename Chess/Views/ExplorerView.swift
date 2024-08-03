@@ -123,12 +123,12 @@ struct ExplorerView: View {
             .sheet(isPresented: $showingEditBoardView) {
                 EditBoardView(lightSquareColor: $lightSquareColor, darkSquareColor: $darkSquareColor)
             }
-            .onChange(of: lightSquareColor) { newColor, _ in
-                UserDefaults.standard.set(newColor, forKey: "lightSquareColor")
-            }
-            .onChange(of: darkSquareColor) { newColor, _ in
-                UserDefaults.standard.set(newColor, forKey: "darkSquareColor")
-            }
+//            .onChange(of: lightSquareColor) { newColor, _ in
+//                UserDefaults.standard.set(newColor, forKey: "lightSquareColor")
+//            }
+//            .onChange(of: darkSquareColor) { newColor, _ in
+//                UserDefaults.standard.set(newColor, forKey: "darkSquareColor")
+//            }
         }
         
     }

@@ -45,18 +45,6 @@
 		AB4B64452C5CA9D10092A3F0 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B64442C5CA9D00092A3F0 /* GameView.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		AB4B642E2C5C8A5D0092A3F0 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PVPMoveLogView.swift; sourceTree = "<group>"; };
 		A93A65112C5D978200010333 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
@@ -88,7 +76,6 @@
 		AB3A22682C5B266C00810B4E /* PromotionDialogOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromotionDialogOverlayView.swift; sourceTree = "<group>"; };
 		AB3A226D2C5B293E00810B4E /* ChessClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessClient.swift; sourceTree = "<group>"; };
 		AB3A226F2C5B294A00810B4E /* ChessServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessServer.swift; sourceTree = "<group>"; };
-		AB4B64302C5C8A5D0092A3F0 /* ChessServerMain */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ChessServerMain; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB4B64372C5C94E10092A3F0 /* Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Misc.swift; sourceTree = "<group>"; };
 		AB4B64392C5C95AB0092A3F0 /* MatchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchManager.swift; sourceTree = "<group>"; };
 		AB4B643B2C5C9AE40092A3F0 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
@@ -101,13 +88,6 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		A9FD36CB2C52E653003473BA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AB4B642D2C5C8A5D0092A3F0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -129,7 +109,6 @@
 			isa = PBXGroup;
 			children = (
 				A9FD36CE2C52E653003473BA /* Chess.app */,
-				AB4B64302C5C8A5D0092A3F0 /* ChessServerMain */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -238,23 +217,6 @@
 			productReference = A9FD36CE2C52E653003473BA /* Chess.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AB4B642F2C5C8A5D0092A3F0 /* ChessServerMain */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AB4B64362C5C8A5D0092A3F0 /* Build configuration list for PBXNativeTarget "ChessServerMain" */;
-			buildPhases = (
-				AB4B642C2C5C8A5D0092A3F0 /* Sources */,
-				AB4B642D2C5C8A5D0092A3F0 /* Frameworks */,
-				AB4B642E2C5C8A5D0092A3F0 /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = ChessServerMain;
-			productName = ChessServerMain;
-			productReference = AB4B64302C5C8A5D0092A3F0 /* ChessServerMain */;
-			productType = "com.apple.product-type.tool";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -266,9 +228,6 @@
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					A9FD36CD2C52E653003473BA = {
-						CreatedOnToolsVersion = 15.4;
-					};
-					AB4B642F2C5C8A5D0092A3F0 = {
 						CreatedOnToolsVersion = 15.4;
 					};
 				};
@@ -287,7 +246,6 @@
 			projectRoot = "";
 			targets = (
 				A9FD36CD2C52E653003473BA /* Chess */,
-				AB4B642F2C5C8A5D0092A3F0 /* ChessServerMain */,
 			);
 		};
 /* End PBXProject section */
@@ -346,13 +304,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AB4B642C2C5C8A5D0092A3F0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -408,7 +359,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -465,7 +416,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -493,6 +444,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -500,6 +452,8 @@
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.BorysBanaszkiewicz.Chess;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -523,6 +477,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -530,35 +485,11 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.BorysBanaszkiewicz.Chess;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		AB4B64342C5C8A5D0092A3F0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SKDKJ7SAFD;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		AB4B64352C5C8A5D0092A3F0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SKDKJ7SAFD;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -579,15 +510,6 @@
 			buildConfigurations = (
 				A9FD36DD2C52E655003473BA /* Debug */,
 				A9FD36DE2C52E655003473BA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		AB4B64362C5C8A5D0092A3F0 /* Build configuration list for PBXNativeTarget "ChessServerMain" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AB4B64342C5C8A5D0092A3F0 /* Debug */,
-				AB4B64352C5C8A5D0092A3F0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

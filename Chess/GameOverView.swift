@@ -13,12 +13,6 @@ struct GameOverView: View {
     var body: some View {
         VStack {
             Spacer()
-            
-            //Image ??
-    //        .resizable()
-    //        .scaledToFill()
-    //        .padding(.horizontal, 70)
-    //        .padding(.vertical)
             Text("Game over by \(matchManager.message)")
                 .font(.largeTitle)
                 .bold()
@@ -44,12 +38,6 @@ struct GameOverView: View {
             Spacer()
         }
         .background()
-        //Image ??
-//        .resizable()
-//        .scaledToFill()
-//        .padding(.horizontal, 70)
-//        .padding(.vertical)
-        //.ignoresafearea()
     }
 }
 

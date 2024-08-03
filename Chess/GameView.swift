@@ -11,7 +11,7 @@ var countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect
 
 struct GameView: View {
     @ObservedObject var matchManager: MatchManager
-    @ObservedObject private var board = Board()
+    @State private var board = Board()
     @State private var selectedPiece: GamePiece?
     @State private var legalMoves: [(Int, Int)] = []
     @State private var legalCaptures: [(Int, Int)] = []
@@ -26,15 +26,22 @@ struct GameView: View {
     @State private var showingEditBoardView = false
     @State private var flipped = false
     
+    init(matchManager: MatchManager) {
+        self.matchManager = matchManager
+        _flipped = State(initialValue: !matchManager.isPlayerOne)
+    }
+    
     func makeMove(from: (Int, Int), to: (Int, Int), isPromotion: Bool, pieceType: String) {
         let moveData = MoveData(oldRow: from.0, oldCol: from.1, newRow: to.0, newCol: to.1, isPromotion: isPromotion, pieceType: pieceType)
         matchManager.sendMove(moveData)
+        board.applyMove(from: from, to: to, isPromotion: isPromotion, pieceType: pieceType)
     }
-    
+
+
     var body: some View {
         ZStack {
             GeometryReader { geometry in
-                let size = min(geometry.size.width, geometry.size.height * 0.7)
+                let size = min(geometry.size.width, geometry.size.height)
                 VStack {
                     topBar
                     HStack(spacing: 0) {
@@ -48,13 +55,11 @@ struct GameView: View {
                     }
                     .frame(height: 20)
                     .padding(.horizontal, 10)
-                    
                     ZStack {
                         let squareSize = size / 8
-                        ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: flipped)
+                        ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: matchManager.flipped)
                             .frame(width: size, height: size)
-                        
-                        PiecesView(board: board, matchManager: matchManager, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, flipped: $flipped)
+                        PiecesView(board: $board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, flipped: $matchManager.flipped, makeMove: makeMove)//, makeMove: makeMove)
                             .frame(width: size, height: size)
                             .contentShape(Rectangle())
                             .onTapGesture {
@@ -85,6 +90,20 @@ struct GameView: View {
                         .padding(.leading, 20)
                 }
             }
+            GeometryReader { geometry in
+                let size = min(geometry.size.width, geometry.size.height * 0.7)
+                if showingPromotionDialog, let details = promotionDetails {
+                    PromotionDialogOverlayView(details: details, size: size, onSelect: { piece in
+                        details.3(piece)
+                        showingPromotionDialog = false
+                    })
+                }
+            }
+        }
+        .background(Color.white)
+        .onReceive(board.promotionPublisher) { details in
+            self.promotionDetails = details
+            self.showingPromotionDialog = true
         }
         .onReceive(countdownTimer) { _ in
             guard matchManager.isTimeKeeper else { return }
@@ -96,8 +115,7 @@ struct GameView: View {
         }
         .onReceive(matchManager.$lastReceivedMove) { move in
             if let move = move {
-                // Update the board and UI when a new move is received
-                self.board.applyMove(from: (move.oldRow, move.oldCol), to: (move.newRow, move.newCol), isPromotion: move.isPromotion, pieceType: move.pieceType)
+                board.applyMove(from: (move.oldRow, move.oldCol), to: (move.newRow, move.newCol), isPromotion: move.isPromotion, pieceType: move.pieceType)
             }
         }
     }
@@ -139,7 +157,6 @@ struct GameView: View {
                         }
                     }
                     Spacer()
-                    
                     Label("\(matchManager.remainingTimeWhite)",
                           systemImage: "clock.fill")
                     .bold()
@@ -173,7 +190,6 @@ struct GameView: View {
                         }
                     }
                     Spacer()
-                    
                     Label("\(matchManager.remainingTimeWhite)",
                           systemImage: "clock.fill")
                     .bold()
@@ -194,8 +210,7 @@ struct GameView: View {
 }
 
 struct PiecesView: View {
-    @ObservedObject var board: Board
-    @ObservedObject var matchManager: MatchManager
+    @Binding var board: Board
     var squareSize: CGFloat
     @Binding var selectedPiece: GamePiece?
     @Binding var legalMoves: [(Int, Int)]
@@ -205,14 +220,14 @@ struct PiecesView: View {
     @Binding var isMate: Bool
     @Binding var selectedMoveIndex: Int?
     @Binding var flipped: Bool
-
+    var makeMove: (_ from: (Int, Int), _ to: (Int, Int), _ isPromotion: Bool, _ pieceType: String) -> Void
     @State private var isPieceSelected = false
     @State private var dragOffset = CGSize.zero
     @State private var draggedPiece: GamePiece?
     @State private var initialPosition: (Int, Int)?
     @State private var enPassantPosition: (Int, Int)?
     @State private var glowOpacity = 0.3
-    
+
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     let checkFeedback = UIImpactFeedbackGenerator(style: .heavy)
     
@@ -221,7 +236,7 @@ struct PiecesView: View {
             if lastMove.isCheck == true {
                 let color = lastMove.piece.color
                 ZStack {
-                    let (kingRow, kingCol) = self.board.getKingPosition(color: color == "black" ? "white" : "black")
+                    let (kingRow, kingCol) = board.getKingPosition(color: color == "black" ? "white" : "black")
                     let (displayRow, displayCol) = flipped ? (7 - kingRow, 7 - kingCol) : (kingRow, kingCol)
                     RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
                         .frame(width: squareSize, height: squareSize)
@@ -248,7 +263,6 @@ struct PiecesView: View {
                             if let ep = enPassantPosition, ep == (displayRow, displayCol) {
                                 RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                     .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
-                                
                             }
                             if legalMoves.contains(where: { $0 == (displayRow, displayCol)}) {
                                 if legalCaptures.contains(where: { $0 == (displayRow, displayCol) }) {
@@ -282,7 +296,6 @@ struct PiecesView: View {
                                         x: selectedPiece == piece ? dragOffset.width : 0,
                                         y: selectedPiece == piece ? dragOffset.height : 0
                                     )
-
                                     .rotationEffect(isMate && piece.pieceType == "king" && (piece.color == "white" && whiteMove || piece.color == "black" && !whiteMove) ? .degrees(-90) : .degrees(0))
                                     .onTapGesture {
                                         feedbackGenerator.impactOccurred()
@@ -292,8 +305,6 @@ struct PiecesView: View {
                                             selectPiece(piece: piece, at: (displayRow, displayCol))
                                         }
                                     }
-                                    
-
                             }
                         }
                         .frame(width: squareSize, height: squareSize)
@@ -325,50 +336,62 @@ struct PiecesView: View {
         }
         return false
     }
+    
     private func selectPiece(piece: GamePiece, at position: (Int, Int)) {
-        if matchManager.currentTurn && ((whiteMove && piece.color == "white") || (!whiteMove && piece.color == "black")) {
-                selectedPiece = piece
-                selectedPosition = position
-                piece.setLegalMoves(board: self.board)
-                legalMoves = piece.validateLegalMoves(board: self.board)
-                legalCaptures = piece.getLegalCaptures(board: self.board)
-                isPieceSelected = true
-                getEnPassantPosition()
-            } else {
-                selectedPiece = nil
-                legalMoves = []
-                legalCaptures = []
-                selectedPosition = nil
-                enPassantPosition = nil
-            }
-        }
-
-        private func movePiece(to newPos: (Int, Int)) {
-            guard let piece = selectedPiece, let currentPosition = selectedPosition else { return }
-            
-            let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
-            let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
-
-            dragOffset = CGSize(width: -colDiff, height: -rowDiff)
-
-            board.movePiece(piece: piece, newPosition: newPos)
-            
-            withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
-                dragOffset = .zero
-            }
-            board.undoneMoves.reset()
-            
-            selectedMoveIndex = board.getMoveLog().count - 1
-            isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
-            
-            whiteMove.toggle()
+        if whiteMove && piece.color == "white" || !whiteMove && piece.color == "black" {
+            selectedPiece = piece
+            selectedPosition = position
+            piece.setLegalMoves(board: board)
+            legalMoves = piece.validateLegalMoves(board: board)
+            legalCaptures = piece.getLegalCaptures(board: board)
+            isPieceSelected = true
+            getEnPassantPosition()
+        } else {
             selectedPiece = nil
-            selectedPosition = nil
             legalMoves = []
             legalCaptures = []
-            isPieceSelected = false
+            selectedPosition = nil
             enPassantPosition = nil
         }
+    }
+
+    private func movePiece(to newPos: (Int, Int)) {
+        guard let piece = selectedPiece, let currentPosition = selectedPosition else { return }
+        
+        let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
+        let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
+
+        dragOffset = CGSize(width: -colDiff, height: -rowDiff)
+
+        board.movePiece(piece: piece, newPosition: newPos)
+        
+        withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
+            dragOffset = .zero
+        }
+        board.undoneMoves.reset()
+        
+        selectedMoveIndex = board.getMoveLog().count - 1
+        isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
+        
+        whiteMove.toggle()
+        selectedPiece = nil
+        selectedPosition = nil
+        legalMoves = []
+        legalCaptures = []
+        isPieceSelected = false
+        enPassantPosition = nil
+        
+        if let lastMove = board.getMoveLog().last {
+           let from = lastMove.oldPosition
+           let to = lastMove.newPosition
+           let isPromotion = lastMove.isPromotion
+           let pieceType = lastMove.piece.pieceType
+//           matchManager.flipped.toggle()
+//           let moveData = MoveData()
+           makeMove(from, to, isPromotion, pieceType)
+//           sendMove(moveData)
+       }
+    }
 }
 
 #Preview {

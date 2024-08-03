@@ -10,7 +10,6 @@ import GameKit
 
 
 class MatchManager: NSObject, ObservableObject {
-    @Published var board = Board()
     @Published var inGame = false
     @Published var isGameOver = false
     @Published var authenticationState = PlayerAuthState.authenticating
@@ -22,11 +21,15 @@ class MatchManager: NSObject, ObservableObject {
     @Published var isTimeKeeper = false
     @Published var lastReceivedMove: MoveData?
     
+    @Published var flipped = false
+    
     var match: GKMatch?
     var otherPlayer: GKPlayer?
     var localPlayer = GKLocalPlayer.local
     
     var playerUUIDKey = UUID().uuidString
+    
+    var isPlayerOne = true
     
     var rootViewController: UIViewController? {
         let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
@@ -41,7 +44,6 @@ class MatchManager: NSObject, ObservableObject {
             }
             if let error = error {
                 authenticationState = .error
-//                print(error.localizedDescription)
                 print("Game Center Authentication Error: \(error.localizedDescription)")
                 return
             }
@@ -81,34 +83,8 @@ class MatchManager: NSObject, ObservableObject {
         inGame = true
         isGameOver = false
         
-        // Determine the turn
-        self.currentTurn = GKLocalPlayer.local.playerID < (otherPlayer?.playerID ?? "")
-    }
-    
-    func receivedString(_ message: String) {
-        let messageSplit = message.split(separator: ":")
-        guard let messagePrefix = messageSplit.first else { return }
-        
-        let parameter = String(messageSplit.last ?? "")
-        
-        switch messagePrefix {
-        case "began":
-            if playerUUIDKey == parameter {
-                playerUUIDKey = UUID().uuidString
-                sendString("began:\(playerUUIDKey)")
-                break
-            }
-            
-            currentTurn = playerUUIDKey < parameter
-            inGame = true
-            isTimeKeeper = true
-            
-            if isTimeKeeper {
-                countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-            }
-        default:
-            break
-        }
+        isPlayerOne = GKLocalPlayer.local.gamePlayerID < (otherPlayer?.gamePlayerID ?? "")
+        currentTurn = true
     }
     
     func sendMove(_ moveData: MoveData) {
@@ -122,13 +98,19 @@ class MatchManager: NSObject, ObservableObject {
     
     func receivedMove(_ moveData: MoveData) {
         DispatchQueue.main.async { // Ensure UI updates are performed on the main thread
-            self.board.applyMove(from: (moveData.oldRow, moveData.oldCol), to: (moveData.newRow, moveData.newCol), isPromotion: moveData.isPromotion, pieceType: moveData.pieceType)
             self.lastReceivedMove = moveData
             self.currentTurn.toggle()
         }
     }
     
     func resetGame() {
-        
+        self.inGame = false
+        self.isGameOver = false
+        self.message = "checkmate"
+        self.currentTurn = true
+        self.remainingTimeWhite = maxTimeRemaining
+        self.remainingTimeBlack = maxTimeRemaining
+        self.isTimeKeeper = false
+        self.lastReceivedMove = nil
     }
 }
