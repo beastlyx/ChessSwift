@@ -14,20 +14,19 @@ class MatchManager: NSObject, ObservableObject {
     @Published var isGameOver = false
     @Published var authenticationState = PlayerAuthState.authenticating
     
-    @Published var currentlyMoving = false
-    @Published var turnPrompt = ""
-    @Published var pastMoves = [MoveData]()
-//    @Published var pastMoves = [MoveLog]()
+    @Published var currentlyDrawing = false
+    @Published var drawPrompt = ""
+    @Published var pastGuesses = [PastGuess]()
     
-//    @Published var score = 0
+    @Published var score = 0
     @Published var remainingTime = maxTimeRemaining {
         willSet {
-            if isTimeKeeper { sendMove("timer:\(newValue)") }
+            if isTimeKeeper { sendString("timer:\(newValue)") }
             if newValue < 0 { gameOver() }
         }
     }
     @Published var isTimeKeeper = false
-    @Published var lastReceivedMove = MoveData()
+    @Published var lastReceivedDrawing = PKDrawing()
     
     
     var match: GKMatch?
@@ -81,14 +80,15 @@ class MatchManager: NSObject, ObservableObject {
         match = newMatch
         match?.delegate = self
         otherPlayer = match?.players.first
-        turnPrompt = "White to move"
+        drawPrompt = everydayObjects.randomElement()!
         
-        sendMove("began:\(playerUUIDKey)")
+        sendString("began:\(playerUUIDKey)")
     }
     
     func swapRoles() {
-        currentlyMoving = !currentlyMoving
-        turnPrompt = turnPrompt == "White to move" ? "Black to move" : "White to move"
+        score += 1
+        currentlyDrawing = !currentlyDrawing
+        drawPrompt = everydayObjects.randomElement()!
     }
     
     func gameOver() {
@@ -100,15 +100,16 @@ class MatchManager: NSObject, ObservableObject {
         DispatchQueue.main.async { [self] in
             isGameOver = false
             inGame = false
-            turnPrompt = ""
+            drawPrompt = ""
+            score = 0
             remainingTime = maxTimeRemaining
-            lastReceivedMove = MoveData()
+            lastReceivedDrawing = PKDrawing()
         }
         isTimeKeeper = false
         match?.delegate = nil
         match = nil
         otherPlayer = nil
-        pastMoves.removeAll()
+        pastGuesses.removeAll()
         playerUUIDKey = UUID().uuidString
     }
     
@@ -116,42 +117,41 @@ class MatchManager: NSObject, ObservableObject {
         let messageSplit = message.split(separator: ":")
         guard let messagePrefix = messageSplit.first else { return }
         
-        let parameter = messageSplit.dropFirst().joined(separator: ":")
+        let parameter = String(messageSplit.last ?? "")
         
         switch messagePrefix {
         case "began":
             if playerUUIDKey == parameter {
                 playerUUIDKey = UUID().uuidString
-                sendMove("began:\(playerUUIDKey)")
+                sendString("began:\(playerUUIDKey)")
                 break
             }
             
-            currentlyMoving = playerUUIDKey < parameter
+            currentlyDrawing = playerUUIDKey < parameter
             inGame = true
-            isTimeKeeper = currentlyMoving
+            isTimeKeeper = currentlyDrawing
             
             if isTimeKeeper {
                 countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
             }
-        case "move":
-//            var guessCorrect = false
+        case "guess":
+            var guessCorrect = false
             
-//            if parameter.lowercased() == drawPrompt {
-//            sendMove("move:\(parameter)")
-                
-//                guessCorrect = true
-//            } else {
-//                sendString("incorrect:\(parameter)")
-//            }
+            if parameter.lowercased() == drawPrompt {
+                sendString("correct:\(parameter)")
+                swapRoles()
+                guessCorrect = true
+            } else {
+                sendString("incorrect:\(parameter)")
+            }
             
-            appendPastMove(move: parameter)
+            appendPastGuess(guess: parameter, correct: guessCorrect)
+            
+        case "correct":
             swapRoles()
-//
-//        case "correct":
-//            swapRoles()
-//            appendPastGuess(guess: parameter, correct: true)
-//        case "incorrect":
-//            appendPastGuess(guess: parameter, correct: false)
+            appendPastGuess(guess: parameter, correct: true)
+        case "incorrect":
+            appendPastGuess(guess: parameter, correct: false)
         case "timer":
             remainingTime = Int(parameter) ?? 0
         default:
@@ -159,26 +159,7 @@ class MatchManager: NSObject, ObservableObject {
         }
     }
 
-    func appendPastMove(move: String) {
-        let messageSplit = move.split(separator: ":")
-        
-        var data = MoveData()
-        data.originalPosition = parseTuple(String(messageSplit[0]))
-        data.newPosition = parseTuple(String(messageSplit[1]))
-        data.isPromotion = Bool(String(messageSplit[2])) ?? false
-        data.pieceType = String(messageSplit[3])
-        
-        pastMoves.append(data)
-        lastReceivedMove = data
-    }
-    
-    func parseTuple(_ str: String) -> (Int, Int) {
-        let cleanedString = str.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
-        let parts = cleanedString.split(separator: ",")
-        
-        let first = Int(parts[0])!
-        let second = Int(parts[1])!
-        
-        return (first, second)
+    func appendPastGuess(guess: String, correct: Bool) {
+        pastGuesses.append(PastGuess(message: "\(guess)\(correct ? "was correct!" : "")", correct: correct))
     }
 }

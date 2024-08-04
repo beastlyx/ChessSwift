@@ -16,4 +16,33 @@ enum PlayerAuthState: String {
     case restricted = "You're not allowed to play multiplayer games!"
 }
 
+struct MoveData: Identifiable, Equatable {
+    let id = UUID()
+    var originalPosition: (Int, Int)
+    var newPosition: (Int, Int)
+    var isPromotion: Bool
+    var pieceType: String
+    
+    init() {
+        originalPosition = (-1, -1)
+        newPosition = (-1, -1)
+        isPromotion = false
+        pieceType = ""
+    }
+    
+    static func ==(lhs: MoveData, rhs: MoveData) -> Bool {
+        return lhs.originalPosition == rhs.originalPosition &&
+               lhs.newPosition == rhs.newPosition &&
+               lhs.isPromotion == rhs.isPromotion &&
+               lhs.pieceType == rhs.pieceType
+    }
+}
+
 let maxTimeRemaining = 600
+
+
+//struct PastGuess: Identifiable {
+//    let id = UUID()
+//    var message: String
+//    var correct: Bool
+//}

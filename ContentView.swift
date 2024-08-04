@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  Chess
+//  Guess The Doodle
 //
 //  Created by Borys Banaszkiewicz on 8/3/24.
 //

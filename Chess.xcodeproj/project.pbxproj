@@ -8,11 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		A93A650E2C5C556E00010333 /* PVPMoveLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */; };
-		A93A65122C5D978200010333 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A65112C5D978200010333 /* MenuView.swift */; };
 		A941B39E2C5BEC130007E1FD /* ChessClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226D2C5B293E00810B4E /* ChessClient.swift */; };
-		A941B3A02C5BEC7C0007E1FD /* MoveData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A941B39F2C5BEC7C0007E1FD /* MoveData.swift */; };
 		A941B3A52C5BEF030007E1FD /* PlayerVersusPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */; };
 		A941B3A72C5BF1BA0007E1FD /* ChessServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A226F2C5B294A00810B4E /* ChessServer.swift */; };
+		A952EE8C2C5ECFB800F4E5B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE8B2C5ECFB800F4E5B5 /* ContentView.swift */; };
+		A952EE8E2C5ECFCA00F4E5B5 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE8D2C5ECFCA00F4E5B5 /* GameOverView.swift */; };
+		A952EE902C5ECFD900F4E5B5 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE8F2C5ECFD900F4E5B5 /* GameView.swift */; };
+		A952EE922C5ECFF400F4E5B5 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE912C5ECFF400F4E5B5 /* MenuView.swift */; };
+		A952EE942C5ED00400F4E5B5 /* ChessGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE932C5ED00400F4E5B5 /* ChessGameView.swift */; };
+		A952EE962C5ED01400F4E5B5 /* Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE952C5ED01400F4E5B5 /* Misc.swift */; };
+		A952EE982C5ED02B00F4E5B5 /* MatchManager+GKMatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE972C5ED02B00F4E5B5 /* MatchManager+GKMatchDelegate.swift */; };
+		A952EE9A2C5ED03B00F4E5B5 /* MatchManager+GKMatchmakerViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE992C5ED03B00F4E5B5 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */; };
+		A952EE9C2C5ED04A00F4E5B5 /* MatchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE9B2C5ED04A00F4E5B5 /* MatchManager.swift */; };
+		A952EEA02C5EFAB200F4E5B5 /* PiecesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952EE9F2C5EFAB200F4E5B5 /* PiecesView.swift */; };
 		A984EEC62C5AF9B60006FB92 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A984EEC52C5AF9B60006FB92 /* AboutView.swift */; };
 		A984EEC82C5B11800006FB92 /* EditBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A984EEC72C5B11800006FB92 /* EditBoardView.swift */; };
 		A9FD36D22C52E653003473BA /* ChessApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FD36D12C52E653003473BA /* ChessApp.swift */; };
@@ -36,20 +44,21 @@
 		AB3A22652C5B261400810B4E /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22642C5B261400810B4E /* SideMenuView.swift */; };
 		AB3A22672C5B264700810B4E /* ChessPiecesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22662C5B264700810B4E /* ChessPiecesView.swift */; };
 		AB3A22692C5B266C00810B4E /* PromotionDialogOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3A22682C5B266C00810B4E /* PromotionDialogOverlayView.swift */; };
-		AB4B64382C5C94E10092A3F0 /* Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B64372C5C94E10092A3F0 /* Misc.swift */; };
-		AB4B643A2C5C95AB0092A3F0 /* MatchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B64392C5C95AB0092A3F0 /* MatchManager.swift */; };
-		AB4B643C2C5C9AE40092A3F0 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B643B2C5C9AE40092A3F0 /* GameOverView.swift */; };
-		AB4B643F2C5CA35C0092A3F0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B643E2C5CA35C0092A3F0 /* ContentView.swift */; };
-		AB4B64412C5CA4FD0092A3F0 /* MatchManager+GKMatchmakerViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B64402C5CA4FD0092A3F0 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */; };
-		AB4B64432C5CA65A0092A3F0 /* MatchManager+GKMatchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B64422C5CA65A0092A3F0 /* MatchManager+GKMatchDelegate.swift */; };
-		AB4B64452C5CA9D10092A3F0 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4B64442C5CA9D00092A3F0 /* GameView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PVPMoveLogView.swift; sourceTree = "<group>"; };
-		A93A65112C5D978200010333 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
-		A941B39F2C5BEC7C0007E1FD /* MoveData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveData.swift; sourceTree = "<group>"; };
 		A941B3A42C5BEF030007E1FD /* PlayerVersusPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerVersusPlayerView.swift; sourceTree = "<group>"; };
+		A952EE8B2C5ECFB800F4E5B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A952EE8D2C5ECFCA00F4E5B5 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
+		A952EE8F2C5ECFD900F4E5B5 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+		A952EE912C5ECFF400F4E5B5 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		A952EE932C5ED00400F4E5B5 /* ChessGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessGameView.swift; sourceTree = "<group>"; };
+		A952EE952C5ED01400F4E5B5 /* Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Misc.swift; sourceTree = "<group>"; };
+		A952EE972C5ED02B00F4E5B5 /* MatchManager+GKMatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MatchManager+GKMatchDelegate.swift"; sourceTree = "<group>"; };
+		A952EE992C5ED03B00F4E5B5 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MatchManager+GKMatchmakerViewControllerDelegate.swift"; sourceTree = "<group>"; };
+		A952EE9B2C5ED04A00F4E5B5 /* MatchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchManager.swift; sourceTree = "<group>"; };
+		A952EE9F2C5EFAB200F4E5B5 /* PiecesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiecesView.swift; sourceTree = "<group>"; };
 		A984EEC52C5AF9B60006FB92 /* AboutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		A984EEC72C5B11800006FB92 /* EditBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBoardView.swift; sourceTree = "<group>"; };
 		A9FD36CE2C52E653003473BA /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -76,14 +85,7 @@
 		AB3A22682C5B266C00810B4E /* PromotionDialogOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromotionDialogOverlayView.swift; sourceTree = "<group>"; };
 		AB3A226D2C5B293E00810B4E /* ChessClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessClient.swift; sourceTree = "<group>"; };
 		AB3A226F2C5B294A00810B4E /* ChessServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessServer.swift; sourceTree = "<group>"; };
-		AB4B64372C5C94E10092A3F0 /* Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Misc.swift; sourceTree = "<group>"; };
-		AB4B64392C5C95AB0092A3F0 /* MatchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchManager.swift; sourceTree = "<group>"; };
-		AB4B643B2C5C9AE40092A3F0 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
 		AB4B643D2C5C9F4B0092A3F0 /* Chess.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Chess.entitlements; sourceTree = "<group>"; };
-		AB4B643E2C5CA35C0092A3F0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		AB4B64402C5CA4FD0092A3F0 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MatchManager+GKMatchmakerViewControllerDelegate.swift"; sourceTree = "<group>"; };
-		AB4B64422C5CA65A0092A3F0 /* MatchManager+GKMatchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MatchManager+GKMatchDelegate.swift"; sourceTree = "<group>"; };
-		AB4B64442C5CA9D00092A3F0 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,14 +124,15 @@
 				AB09055D2C588CBB00BFDC9B /* GameLogic */,
 				AB09055C2C588C9300BFDC9B /* Views */,
 				A9FD36D72C52E655003473BA /* Preview Content */,
-				AB4B64372C5C94E10092A3F0 /* Misc.swift */,
-				AB4B64392C5C95AB0092A3F0 /* MatchManager.swift */,
-				AB4B643B2C5C9AE40092A3F0 /* GameOverView.swift */,
-				AB4B643E2C5CA35C0092A3F0 /* ContentView.swift */,
-				AB4B64402C5CA4FD0092A3F0 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */,
-				AB4B64422C5CA65A0092A3F0 /* MatchManager+GKMatchDelegate.swift */,
-				AB4B64442C5CA9D00092A3F0 /* GameView.swift */,
-				A93A65112C5D978200010333 /* MenuView.swift */,
+				A952EE8B2C5ECFB800F4E5B5 /* ContentView.swift */,
+				A952EE8D2C5ECFCA00F4E5B5 /* GameOverView.swift */,
+				A952EE8F2C5ECFD900F4E5B5 /* GameView.swift */,
+				A952EE912C5ECFF400F4E5B5 /* MenuView.swift */,
+				A952EE932C5ED00400F4E5B5 /* ChessGameView.swift */,
+				A952EE952C5ED01400F4E5B5 /* Misc.swift */,
+				A952EE972C5ED02B00F4E5B5 /* MatchManager+GKMatchDelegate.swift */,
+				A952EE992C5ED03B00F4E5B5 /* MatchManager+GKMatchmakerViewControllerDelegate.swift */,
+				A952EE9B2C5ED04A00F4E5B5 /* MatchManager.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -159,6 +162,7 @@
 				AB3A22682C5B266C00810B4E /* PromotionDialogOverlayView.swift */,
 				A9FD36D12C52E653003473BA /* ChessApp.swift */,
 				A9FD36D52C52E655003473BA /* Assets.xcassets */,
+				A952EE9F2C5EFAB200F4E5B5 /* PiecesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -191,7 +195,6 @@
 			children = (
 				AB3A226D2C5B293E00810B4E /* ChessClient.swift */,
 				AB3A226F2C5B294A00810B4E /* ChessServer.swift */,
-				A941B39F2C5BEC7C0007E1FD /* MoveData.swift */,
 				A93A650D2C5C556E00010333 /* PVPMoveLogView.swift */,
 			);
 			path = PVP;
@@ -267,37 +270,38 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AB4B64412C5CA4FD0092A3F0 /* MatchManager+GKMatchmakerViewControllerDelegate.swift in Sources */,
 				A9FD36E62C530530003473BA /* BoardState.swift in Sources */,
 				AB09055F2C588D0E00BFDC9B /* MainMenuView.swift in Sources */,
+				A952EE982C5ED02B00F4E5B5 /* MatchManager+GKMatchDelegate.swift in Sources */,
+				A952EE9C2C5ED04A00F4E5B5 /* MatchManager.swift in Sources */,
 				AB3A22652C5B261400810B4E /* SideMenuView.swift in Sources */,
-				AB4B64382C5C94E10092A3F0 /* Misc.swift in Sources */,
 				A9FD36EA2C530585003473BA /* MoveLog.swift in Sources */,
+				A952EE942C5ED00400F4E5B5 /* ChessGameView.swift in Sources */,
 				AB3A22672C5B264700810B4E /* ChessPiecesView.swift in Sources */,
-				A93A65122C5D978200010333 /* MenuView.swift in Sources */,
 				A941B39E2C5BEC130007E1FD /* ChessClient.swift in Sources */,
 				A9FD36D42C52E653003473BA /* ExplorerView.swift in Sources */,
 				A984EEC62C5AF9B60006FB92 /* AboutView.swift in Sources */,
+				A952EE9A2C5ED03B00F4E5B5 /* MatchManager+GKMatchmakerViewControllerDelegate.swift in Sources */,
 				A9FD36EC2C5305A8003473BA /* UndoMove.swift in Sources */,
 				AB0905612C58946000BFDC9B /* AnalyzeGamesView.swift in Sources */,
 				AB3A22632C5B25F000810B4E /* ChessBoardView.swift in Sources */,
-				AB4B643C2C5C9AE40092A3F0 /* GameOverView.swift in Sources */,
 				A9FD36E02C52F0FB003473BA /* Pieces.swift in Sources */,
 				A9FD36E42C5304D2003473BA /* CheckConditions.swift in Sources */,
-				AB4B64452C5CA9D10092A3F0 /* GameView.swift in Sources */,
 				AB3A22692C5B266C00810B4E /* PromotionDialogOverlayView.swift in Sources */,
+				A952EE8E2C5ECFCA00F4E5B5 /* GameOverView.swift in Sources */,
+				A952EE8C2C5ECFB800F4E5B5 /* ContentView.swift in Sources */,
+				A952EEA02C5EFAB200F4E5B5 /* PiecesView.swift in Sources */,
+				A952EE962C5ED01400F4E5B5 /* Misc.swift in Sources */,
 				A941B3A52C5BEF030007E1FD /* PlayerVersusPlayerView.swift in Sources */,
-				AB4B64432C5CA65A0092A3F0 /* MatchManager+GKMatchDelegate.swift in Sources */,
 				A93A650E2C5C556E00010333 /* PVPMoveLogView.swift in Sources */,
-				AB4B643A2C5C95AB0092A3F0 /* MatchManager.swift in Sources */,
+				A952EE902C5ECFD900F4E5B5 /* GameView.swift in Sources */,
 				A941B3A72C5BF1BA0007E1FD /* ChessServer.swift in Sources */,
 				A9FD36E22C52FF1F003473BA /* Board.swift in Sources */,
 				AB3A225A2C5B1BDA00810B4E /* UserDefaults.swift in Sources */,
 				AB3A22612C5B25D100810B4E /* MoveLogView.swift in Sources */,
-				A941B3A02C5BEC7C0007E1FD /* MoveData.swift in Sources */,
 				AB3A225F2C5B24DA00810B4E /* CapturedPiecesView.swift in Sources */,
+				A952EE922C5ECFF400F4E5B5 /* MenuView.swift in Sources */,
 				A9FD36E82C53055D003473BA /* CapturedPieces.swift in Sources */,
-				AB4B643F2C5CA35C0092A3F0 /* ContentView.swift in Sources */,
 				A9FD36EE2C530643003473BA /* Chess.swift in Sources */,
 				A9FD36D22C52E653003473BA /* ChessApp.swift in Sources */,
 				A984EEC82C5B11800006FB92 /* EditBoardView.swift in Sources */,

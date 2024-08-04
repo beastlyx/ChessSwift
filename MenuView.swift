@@ -24,7 +24,7 @@ struct MenuView: View {
                 matchManager.startMatchmaking()
             } label: {
                 Text("Play")
-                    .foregroundColor(Color.black)
+                    .foregroundColor(Color.white)
                     .font(.largeTitle)
                     .bold()
             }

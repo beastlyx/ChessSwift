@@ -18,18 +18,15 @@ extension MatchManager: GKMatchDelegate {
             let message = content.replacing("strData:", with: "")
             receivedString(message)
         } else {
-            let messageSplit = content.split(separator: ":")
-            var data = MoveData()
-            data.originalPosition = parseTuple(String(messageSplit[0]))
-            data.newPosition = parseTuple(String(messageSplit[1]))
-            data.isPromotion = Bool(String(messageSplit[2])) ?? false
-            data.pieceType = String(messageSplit[3])
-            
-            lastReceivedMove = data
+            do {
+                try lastReceivedDrawing = PKDrawing(data: data)
+            } catch {
+                print(error)
+            }
         }
     }
     
-    func sendMove(_ message: String) {
+    func sendString(_ message: String) {
         guard let encoded = "strData:\(message)".data(using: .utf8) else { return }
         sendData(encoded, mode: .reliable)
     }

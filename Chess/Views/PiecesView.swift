@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-struct ChessPiecesView: View {
+struct PiecesView: View {
     @ObservedObject var board: Board
     var squareSize: CGFloat
     @Binding var selectedPiece: GamePiece?
@@ -11,6 +11,7 @@ struct ChessPiecesView: View {
     @Binding var whiteMove: Bool
     @Binding var isMate: Bool
     @Binding var selectedMoveIndex: Int?
+    @Binding var moveMade: String
     @State private var isPieceSelected = false
     @State private var dragOffset = CGSize.zero
     @State private var draggedPiece: GamePiece?
@@ -170,7 +171,7 @@ struct ChessPiecesView: View {
         
         selectedMoveIndex = board.getMoveLog().count - 1
         isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
-
+        
         whiteMove.toggle()
         selectedPiece = nil
         selectedPosition = nil
@@ -179,5 +180,7 @@ struct ChessPiecesView: View {
         isPieceSelected = false
         enPassantPosition = nil
         
+        let last = board.getMoveLog().last!
+        moveMade = "(\(last.oldPosition.0),\(last.oldPosition.1)):(\(last.newPosition.0),\(last.newPosition.1)):\(last.isPromotion):\(last.piece.pieceType)"
     }
 }

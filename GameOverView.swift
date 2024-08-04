@@ -19,6 +19,11 @@ struct GameOverView: View {
                 .padding(.horizontal, 70)
                 .padding(.vertical)
             
+            Text("Score \(matchManager.score)")
+                .font(.largeTitle)
+                .bold()
+                .foregroundColor(Color("primaryYellow"))
+            
             Spacer()
             
             Button {
