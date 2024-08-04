@@ -17,18 +17,15 @@ class MatchManager: NSObject, ObservableObject {
     @Published var currentlyMoving = false
     @Published var turnPrompt = ""
     @Published var pastMoves = [MoveData]()
-//    @Published var pastMoves = [MoveLog]()
-    
-//    @Published var score = 0
-    @Published var remainingTime = maxTimeRemaining {
-        willSet {
-            if isTimeKeeper { sendMove("timer:\(newValue)") }
-            if newValue < 0 { gameOver() }
-        }
-    }
-    @Published var isTimeKeeper = false
+//    @Published var remainingTime = maxTimeRemaining {
+//        willSet {
+//            if isTimeKeeper { sendMove("timer:\(newValue)") }
+//            if newValue < 0 { gameOver() }
+//        }
+//    }
+//    @Published var isTimeKeeper = false
     @Published var lastReceivedMove = MoveData()
-    
+    @Published var isWhite = false
     
     var match: GKMatch?
     var otherPlayer: GKPlayer?
@@ -77,13 +74,47 @@ class MatchManager: NSObject, ObservableObject {
         rootViewController?.present(matchmakingVC!, animated: true)
     }
     
+//    func startGame(newMatch: GKMatch) {
+//        match = newMatch
+//        match?.delegate = self
+//        otherPlayer = match?.players.first
+//        turnPrompt = "White to move"
+//        
+//        sendMove("began:\(playerUUIDKey)")
+//    }
+//    func startGame(newMatch: GKMatch) {
+//        inGame = true
+//        match = newMatch
+//        match?.delegate = self
+//        otherPlayer = match?.players.first
+//        
+//        // Determine who moves first based on UUID comparison
+//        let playerIsFirst = playerUUIDKey < (otherPlayer?.gamePlayerID ?? "")
+//        currentlyMoving = playerIsFirst
+//        turnPrompt = playerIsFirst ? "Your move - You are playing white" : "Opponent's move - You are playing black"
+////        timeKeeper = playerIsFirst
+//    }
     func startGame(newMatch: GKMatch) {
+        inGame = true
         match = newMatch
         match?.delegate = self
         otherPlayer = match?.players.first
-        turnPrompt = "White to move"
         
-        sendMove("began:\(playerUUIDKey)")
+        determineRoles()
+    }
+    
+    func determineRoles() {
+        guard let otherPlayer = otherPlayer else { return }
+        
+        if playerUUIDKey < otherPlayer.gamePlayerID {
+            isWhite = true
+            currentlyMoving = true
+            turnPrompt = "Your move - You are playing white"
+        } else {
+            isWhite = false
+            currentlyMoving = false
+            turnPrompt = "Opponent's move - You are playing black"
+        }
     }
     
     func swapRoles() {
@@ -101,10 +132,10 @@ class MatchManager: NSObject, ObservableObject {
             isGameOver = false
             inGame = false
             turnPrompt = ""
-            remainingTime = maxTimeRemaining
+//            remainingTime = maxTimeRemaining
             lastReceivedMove = MoveData()
         }
-        isTimeKeeper = false
+//        isTimeKeeper = false
         match?.delegate = nil
         match = nil
         otherPlayer = nil
@@ -112,73 +143,18 @@ class MatchManager: NSObject, ObservableObject {
         playerUUIDKey = UUID().uuidString
     }
     
-    func receivedString(_ message: String) {
-        let messageSplit = message.split(separator: ":")
-        guard let messagePrefix = messageSplit.first else { return }
-        
-        let parameter = messageSplit.dropFirst().joined(separator: ":")
-        
-        switch messagePrefix {
-        case "began":
-            if playerUUIDKey == parameter {
-                playerUUIDKey = UUID().uuidString
-                sendMove("began:\(playerUUIDKey)")
-                break
-            }
-            
-            currentlyMoving = playerUUIDKey < parameter
-            inGame = true
-            isTimeKeeper = currentlyMoving
-            
-            if isTimeKeeper {
-                countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-            }
-        case "move":
-//            var guessCorrect = false
-            
-//            if parameter.lowercased() == drawPrompt {
-//            sendMove("move:\(parameter)")
-                
-//                guessCorrect = true
-//            } else {
-//                sendString("incorrect:\(parameter)")
+//    func sendMove(_ move: MoveData) {
+//        guard let data = try? JSONEncoder().encode(move) else { return }
+//        try? match?.sendData(toAllPlayers: data, with: .reliable)
+//    }
+//    
+//    func receiveMove(data: Data) {
+//        if let move = try? JSONDecoder().decode(MoveData.self, from: data) {
+//            DispatchQueue.main.async {
+//                self.lastReceivedMove = move
+//                self.pastMoves.append(move)
+//                self.swapRoles()
 //            }
-            
-            appendPastMove(move: parameter)
-            swapRoles()
-//
-//        case "correct":
-//            swapRoles()
-//            appendPastGuess(guess: parameter, correct: true)
-//        case "incorrect":
-//            appendPastGuess(guess: parameter, correct: false)
-        case "timer":
-            remainingTime = Int(parameter) ?? 0
-        default:
-            break
-        }
-    }
-
-    func appendPastMove(move: String) {
-        let messageSplit = move.split(separator: ":")
-        
-        var data = MoveData()
-        data.originalPosition = parseTuple(String(messageSplit[0]))
-        data.newPosition = parseTuple(String(messageSplit[1]))
-        data.isPromotion = Bool(String(messageSplit[2])) ?? false
-        data.pieceType = String(messageSplit[3])
-        
-        pastMoves.append(data)
-        lastReceivedMove = data
-    }
-    
-    func parseTuple(_ str: String) -> (Int, Int) {
-        let cleanedString = str.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
-        let parts = cleanedString.split(separator: ",")
-        
-        let first = Int(parts[0])!
-        let second = Int(parts[1])!
-        
-        return (first, second)
-    }
+//        }
+//    }
 }

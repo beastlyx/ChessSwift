@@ -11,7 +11,9 @@ struct PiecesView: View {
     @Binding var whiteMove: Bool
     @Binding var isMate: Bool
     @Binding var selectedMoveIndex: Int?
-    @Binding var moveMade: String
+    
+    var onMoveMade: (MoveData) -> Void
+    
     @State private var isPieceSelected = false
     @State private var dragOffset = CGSize.zero
     @State private var draggedPiece: GamePiece?
@@ -160,8 +162,13 @@ struct PiecesView: View {
         let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
         let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
 
-        dragOffset = CGSize(width: -colDiff, height: -rowDiff)
-
+        if flipped {
+            dragOffset = CGSize(width: colDiff, height: rowDiff)
+        }
+        else {
+            dragOffset = CGSize(width: -colDiff, height: -rowDiff)
+        }
+        
         board.movePiece(piece: piece, newPosition: newPos)
         
         withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
@@ -181,6 +188,13 @@ struct PiecesView: View {
         enPassantPosition = nil
         
         let last = board.getMoveLog().last!
-        moveMade = "(\(last.oldPosition.0),\(last.oldPosition.1)):(\(last.newPosition.0),\(last.newPosition.1)):\(last.isPromotion):\(last.piece.pieceType)"
+        
+        var move = MoveData()
+        move.originalPosition = Position(x: last.oldPosition.0, y: last.oldPosition.1)
+        move.newPosition = Position(x: last.newPosition.0, y: last.newPosition.1)
+        move.isPromotion = last.isPromotion
+        move.pieceType = last.piece.pieceType
+        
+        onMoveMade(move)
     }
 }

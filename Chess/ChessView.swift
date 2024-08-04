@@ -1,108 +1,8 @@
-////
-////  DrawingView.swift
-////  Guess The Doodle
-////
-////  Created by Borys Banaszkiewicz on 8/3/24.
-////
-//
-//import SwiftUI
-//import PencilKit
-//
-//struct DrawingView: UIViewRepresentable {
-//    class Coordinator: NSObject, PKCanvasViewDelegate {
-//        var matchManager: MatchManager
-//        
-//        init(matchManager: MatchManager) {
-//            self.matchManager = matchManager
-//        }
-//        
-//        func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-//            guard canvasView.isUserInteractionEnabled else { return }
-//            matchManager.sendData(canvasView.drawing.dataRepresentation(), mode: .reliable)
-//        }
-//    }
-//    
-//    @ObservedObject var matchManager: MatchManager
-//    @Binding var eraserEnabled: Bool
-//    
-//    func makeUIView(context: Context) -> PKCanvasView {
-//        let canvasView = PKCanvasView()
-//        
-//        canvasView.drawingPolicy = .anyInput
-//        canvasView.tool = PKInkingTool(.pen, color: .black, width: 5)
-//        canvasView.delegate = context.coordinator
-//        canvasView.isUserInteractionEnabled = matchManager.currentlyDrawing
-//        
-//        return canvasView
-//    }
-//    
-//    func makeCoordinator() -> Coordinator {
-//        Coordinator(matchManager: matchManager)
-//    }
-//    
-//    func updateUIView(_ uiView: PKCanvasView, context: Context) {
-//        let wasDrawing = uiView.isUserInteractionEnabled
-//        uiView.isUserInteractionEnabled = matchManager.currentlyDrawing
-//        
-//        if !wasDrawing && matchManager.currentlyDrawing {
-//            uiView.drawing = PKDrawing()
-//        }
-//        
-//        if !uiView.isUserInteractionEnabled || !matchManager.inGame {
-//            uiView.drawing = matchManager.lastReceivedDrawing
-//        }
-//        
-//        uiView.tool = eraserEnabled ? PKEraserTool(.vector) : PKInkingTool(.pen, color: .black, width: 5)
-//    }
-//}
-//
-//struct DrawingView_Previews: PreviewProvider {
-//    @State static var eraser = false
-//    static var previews: some View {
-//        DrawingView(matchManager: MatchManager(), eraserEnabled: $eraser)
-//    }
-//}
-
 import SwiftUI
-
-struct ChessGameView: UIViewControllerRepresentable {
-    
-    class Coordinator: NSObject {
-        var matchManager: MatchManager
-        
-        init(matchManager: MatchManager) {
-            self.matchManager = matchManager
-        }
-
-//        func sendMove(_ move: MoveData) {
-//            let moveString = "(\(move.originalPosition.0),\(move.originalPosition.1)):(\(move.newPosition.0),\(move.newPosition.1)):\(move.isPromotion):\(move.pieceType)"
-//            guard let moveData = "strData:\(moveString)".data(using: .utf8) else { return }
-//            matchManager.sendData(moveData, mode: .reliable)
-//        }
-    }
-    
-    @ObservedObject var matchManager: MatchManager
-    @Binding var moveMade: String
-    
-    func makeUIViewController(context: Context) -> UIHostingController<ChessView> {
-        let chessView = ChessView(matchManager: matchManager, coordinator: context.coordinator, moveMade: $moveMade)
-        return UIHostingController(rootView: chessView)
-    }
-    
-    func updateUIViewController(_ uiViewController: UIHostingController<ChessView>, context: Context) {
-        uiViewController.rootView = ChessView(matchManager: matchManager, coordinator: context.coordinator, moveMade: $moveMade)
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(matchManager: matchManager)
-    }
-}
 
 struct ChessView: View {
     @ObservedObject var matchManager: MatchManager
-    var coordinator: ChessGameView.Coordinator
-    @Binding var moveMade: String
-    @ObservedObject var board = Board()
+    @ObservedObject var board: Board
     @State private var selectedPiece: GamePiece?
     @State private var legalMoves: [(Int, Int)] = []
     @State private var legalCaptures: [(Int, Int)] = []
@@ -115,7 +15,10 @@ struct ChessView: View {
     @State private var lightSquareColor: Color = UserDefaults.standard.color(forKey: "lightSquareColor") ?? .white
     @State private var darkSquareColor: Color = UserDefaults.standard.color(forKey: "darkSquareColor") ?? Color(red: 218/255, green: 140/255, blue: 44/255)
     @State private var flipped = false
-
+    
+    var isWhite: Bool
+    var onMoveMade: (MoveData) -> Void
+    
     var body: some View {
         GeometryReader { geometry in
             let size = min(geometry.size.width, geometry.size.height * 0.7)
@@ -137,7 +40,7 @@ struct ChessView: View {
                     ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: flipped)
                         .frame(width: size, height: size)
 
-                    PiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, moveMade: $moveMade, flipped: flipped)
+                    PiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, onMoveMade: onMoveMade, flipped: flipped)
                         .frame(width: size, height: size)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -176,17 +79,11 @@ struct ChessView: View {
             }
         }
         .background(Color.white)
-        .onChange(of: matchManager.lastReceivedMove) { newMove in
-            guard newMove.originalPosition != (-1, -1) else { return }
-            board.applyMove(from: newMove.originalPosition, to: newMove.newPosition, isPromotion: newMove.isPromotion, pieceType: newMove.pieceType)
-            selectedPiece = nil
-            legalMoves = []
-            legalCaptures = []
-            selectedPosition = nil
-            whiteMove.toggle()
+        .onAppear {
+            self.flipped = !isWhite
         }
     }
-
+    
     private func pointDifference() -> Int? {
         let whitePoints = board.capturedPieces.calculateWhitePoints()
         let blackPoints = board.capturedPieces.calculateBlackPoints()
@@ -250,11 +147,5 @@ struct ChessView: View {
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .padding(.horizontal, 10)
         }
-    }
-}
-
-struct ChessGameView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChessGameView(matchManager: MatchManager(), moveMade: .constant(""))
     }
 }

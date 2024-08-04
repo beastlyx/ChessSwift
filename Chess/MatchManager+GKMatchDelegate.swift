@@ -1,44 +1,38 @@
-//
-//  MatchManager+GKMatchDelegate.swift
-//  Chess
-//
-//  Created by Borys Banaszkiewicz on 8/2/24.
-//
-
 import Foundation
 import GameKit
-import PencilKit
 
 extension MatchManager: GKMatchDelegate {
-    
+//    func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
+//        receiveMove(data: data)
+//    }
     func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
-        let content = String(decoding: data, as: UTF8.self)
-        
-        if content.starts(with: "strData:") {
-            let message = content.replacing("strData:", with: "")
-            receivedString(message)
-        } else {
-            let messageSplit = content.split(separator: ":")
-            var data = MoveData()
-            data.originalPosition = parseTuple(String(messageSplit[0]))
-            data.newPosition = parseTuple(String(messageSplit[1]))
-            data.isPromotion = Bool(String(messageSplit[2])) ?? false
-            data.pieceType = String(messageSplit[3])
-            
-            lastReceivedMove = data
+        if let content = try? JSONDecoder().decode(MoveData.self, from: data) {
+            receiveMove(data: data)
         }
+        
+//        if content.starts(with: "strData:") {
+//            let message = content.replacing("strData:", with: "")
+//            receivedString(message)
+//        } else {
+//            do {
+//                try lastReceivedDrawing = PKDrawing(data: data)
+//            } catch {
+//                print(error)
+//            }
+//        }
+    }
+    func sendMove(_ move: MoveData) {
+        guard let data = try? JSONEncoder().encode(move) else { return }
+        try? match?.sendData(toAllPlayers: data, with: .reliable)
     }
     
-    func sendMove(_ message: String) {
-        guard let encoded = "strData:\(message)".data(using: .utf8) else { return }
-        sendData(encoded, mode: .reliable)
-    }
-    
-    func sendData(_ data: Data, mode: GKMatch.SendDataMode) {
-        do {
-            try match?.sendData(toAllPlayers: data, with: mode)
-        } catch {
-            print(error)
+    func receiveMove(data: Data) {
+        if let move = try? JSONDecoder().decode(MoveData.self, from: data) {
+            DispatchQueue.main.async {
+                self.lastReceivedMove = move
+                self.pastMoves.append(move)
+                self.swapRoles()
+            }
         }
     }
     

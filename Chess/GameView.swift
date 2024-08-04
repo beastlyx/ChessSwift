@@ -12,16 +12,18 @@
 
 import SwiftUI
 
-var countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+//var countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
 struct GameView: View {
     @ObservedObject var matchManager: MatchManager
-    @State var moveMade = ""
+    @StateObject private var board = Board()
+    @State private var moveMade: MoveData?
     
     func makeMove() {
-        guard !moveMade.isEmpty else { return }
-        matchManager.sendMove("move:\(moveMade)")
-        moveMade = ""
+        if let move = moveMade {
+            matchManager.sendMove(move)
+            moveMade = nil
+        }
     }
     
     var body: some View {
@@ -30,18 +32,26 @@ struct GameView: View {
                 topBar
                 
                 ZStack {
-                    ChessGameView(matchManager: matchManager, moveMade: $moveMade)
+                    ChessView(matchManager: matchManager, board: board, isWhite: matchManager.isWhite, onMoveMade: { move in
+                        moveMade = move
+                        makeMove()
+                    })
+                    .onChange(of: matchManager.lastReceivedMove) { newMove in
+                        applyMove(newMove)
+                    }
                 }
                 
-                promptGroup
+//                promptGroup
                 
-            }
-            .onReceive(countdownTimer) { _ in
-                guard matchManager.isTimeKeeper else { return }
-                matchManager.remainingTime -= 1
             }
         }
         
+    }
+    
+    private func applyMove(_ move: MoveData) {
+        let originalPosition = (move.originalPosition.x, move.originalPosition.y)
+        let newPosition = (move.newPosition.x, move.newPosition.y)
+        self.board.applyMove(from: originalPosition, to: newPosition, isPromotion: move.isPromotion, pieceType: move.pieceType)
     }
     
     var topBar: some View {
@@ -82,56 +92,38 @@ struct GameView: View {
                 }
                 
                 Spacer()
-                Label("\(matchManager.remainingTime)",
-                      systemImage: "clock.fill")
-                .bold()
-                .font(.title2)
-                .foregroundColor(Color(matchManager.currentlyMoving ? "primaryYellow" : "primaryPurple"))
-                Spacer().frame(width: 20)
             }
         }
         .padding(.vertical, 15)
     }
     
-    var promptGroup: some View {
-        VStack {
-            if matchManager.currentlyMoving {
-                Label("Your Move:", systemImage: "exclamationmark.bubble.fill")
-                    .font(.title2)
-                    .bold()
-                    .foregroundColor(.white)
-                Text(matchManager.turnPrompt.uppercased())
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
-                    .foregroundColor(Color("primaryYellow"))
-            } else {
-                HStack {
-                    Label("Opponent turn...", systemImage: "exclamationmark.bubble.fill")
-                        .font(.title2)
-                        .bold()
-                        .foregroundColor(Color("primaryPurple"))
-                    
-                    Spacer()
-                }
-                
-                HStack {
-                    Spacer()
-                    Button {
-                        makeMove()
-                    } label: {
-                        Image(systemName: "checkmark.circle.fill")
-                            .renderingMode(.original)
-                            .foregroundColor(.green)
-                            .font(.system(size: 50))
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding([.horizontal, .bottom], 30)
-        .padding(.vertical)
-    }
+//    var promptGroup: some View {
+//        VStack {
+//            if matchManager.currentlyMoving {
+//                Label("Your Move:", systemImage: "exclamationmark.bubble.fill")
+//                    .font(.title2)
+//                    .bold()
+//                    .foregroundColor(.white)
+//                Text(matchManager.turnPrompt.uppercased())
+//                    .font(.largeTitle)
+//                    .bold()
+//                    .padding()
+//                    .foregroundColor(Color("primaryYellow"))
+//            } else {
+//                HStack {
+//                    Label("Opponent turn...", systemImage: "exclamationmark.bubble.fill")
+//                        .font(.title2)
+//                        .bold()
+//                        .foregroundColor(Color("primaryPurple"))
+//                    
+//                    Spacer()
+//                }
+//            }
+//        }
+//        .frame(maxWidth: .infinity)
+//        .padding([.horizontal, .bottom], 30)
+//        .padding(.vertical)
+//    }
 }
 
 #Preview {
