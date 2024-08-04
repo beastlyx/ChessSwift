@@ -31,6 +31,10 @@ class MatchManager: NSObject, ObservableObject {
     var otherPlayer: GKPlayer?
     var localPlayer = GKLocalPlayer.local
     
+    var playerID: String {
+        return localPlayer.playerID
+    }
+    
     var playerUUIDKey = UUID().uuidString
         
     var rootViewController: UIViewController? {
@@ -106,7 +110,7 @@ class MatchManager: NSObject, ObservableObject {
     func determineRoles() {
         guard let otherPlayer = otherPlayer else { return }
         
-        if playerUUIDKey < otherPlayer.gamePlayerID {
+        if playerID < otherPlayer.playerID {
             isWhite = true
             currentlyMoving = true
             turnPrompt = "Your move - You are playing white"

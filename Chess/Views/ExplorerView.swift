@@ -55,6 +55,10 @@ struct ExplorerView: View {
                                 legalCaptures = []
                                 selectedPosition = nil
                             }
+                            .onReceive(board.promotionPublisher) { details in
+                                self.promotionDetails = details
+                                self.showingPromotionDialog = true
+                            }
                     }
                     HStack(spacing: 0) {
                         CapturedPiecesView(capturedPieces: board.capturedPieces.getBlackCapturedPieces())
@@ -116,10 +120,7 @@ struct ExplorerView: View {
                 }
             }
             .background(Color.white)
-            .onReceive(board.promotionPublisher) { details in
-                self.promotionDetails = details
-                self.showingPromotionDialog = true
-            }
+            
             .sheet(isPresented: $showingEditBoardView) {
                 EditBoardView(lightSquareColor: $lightSquareColor, darkSquareColor: $darkSquareColor)
             }

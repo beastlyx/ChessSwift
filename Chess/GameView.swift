@@ -20,7 +20,15 @@ struct GameView: View {
     @State private var moveMade: MoveData?
     
     func makeMove() {
-        if let move = moveMade {
+        if let movedata = moveMade {
+            var lastMove = self.board.moveLog.last!
+            
+            var move = MoveData()
+            move.originalPosition = Position(x: lastMove.oldPosition.0, y: lastMove.oldPosition.1)
+            move.newPosition = Position(x: lastMove.newPosition.0, y: lastMove.newPosition.1)
+            move.isPromotion = lastMove.isPromotion
+            move.pieceType = lastMove.piece.pieceType
+            
             matchManager.sendMove(move)
             moveMade = nil
         }
@@ -36,9 +44,7 @@ struct GameView: View {
                         moveMade = move
                         makeMove()
                     })
-                    .onChange(of: matchManager.lastReceivedMove) { newMove in
-                        applyMove(newMove)
-                    }
+
                 }
                 
 //                promptGroup
@@ -46,12 +52,6 @@ struct GameView: View {
             }
         }
         
-    }
-    
-    private func applyMove(_ move: MoveData) {
-        let originalPosition = (move.originalPosition.x, move.originalPosition.y)
-        let newPosition = (move.newPosition.x, move.newPosition.y)
-        self.board.applyMove(from: originalPosition, to: newPosition, isPromotion: move.isPromotion, pieceType: move.pieceType)
     }
     
     var topBar: some View {

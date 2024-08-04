@@ -23,8 +23,10 @@ extension MatchManager: GKMatchDelegate {
 //    }
     func sendMove(_ move: MoveData) {
         guard let data = try? JSONEncoder().encode(move) else { return }
-        self.swapRoles()
-        try? match?.sendData(toAllPlayers: data, with: .reliable)
+//        DispatchQueue.main.async {
+            self.swapRoles()
+            try? self.match?.sendData(toAllPlayers: data, with: .reliable)
+//        }
     }
     
     func receiveMove(data: Data) {

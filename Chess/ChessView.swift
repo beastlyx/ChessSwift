@@ -48,6 +48,9 @@ struct ChessView: View {
                             legalCaptures = []
                             selectedPosition = nil
                         }
+                        .onChange(of: matchManager.lastReceivedMove) { newMove in
+                            applyMove(newMove)
+                        }
                 }
                 HStack(spacing: 0) {
                     CapturedPiecesView(capturedPieces: board.capturedPieces.getBlackCapturedPieces())
@@ -74,7 +77,6 @@ struct ChessView: View {
 
         }
 
-//        .background(Color.white)
         .background(
         Image("gameBg")
             .resizable()
@@ -86,6 +88,13 @@ struct ChessView: View {
         .onAppear {
             self.flipped = !isWhite
         }
+        
+    }
+    
+    private func applyMove(_ move: MoveData) {
+        let originalPosition = (move.originalPosition.x, move.originalPosition.y)
+        let newPosition = (move.newPosition.x, move.newPosition.y)
+        self.board.applyMove(from: originalPosition, to: newPosition, isPromotion: move.isPromotion, pieceType: move.pieceType)
     }
     
     private func pointDifference() -> Int? {

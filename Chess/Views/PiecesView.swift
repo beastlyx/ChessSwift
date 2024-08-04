@@ -1,9 +1,6 @@
 
 import SwiftUI
-
-import Dispatch
-
-
+import Combine
 
 struct PiecesView: View {
     @ObservedObject var board: Board
@@ -30,17 +27,16 @@ struct PiecesView: View {
     @State private var glowOpacity = 0.3
     @State private var showingPromotionDialog = false
     @State private var promotionDetails: (Int, Int, String, (GamePiece) -> Void)?
-    
+
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     let checkFeedback = UIImpactFeedbackGenerator(style: .heavy)
-    private let moveSemaphore = DispatchSemaphore(value: 0)
 
     var body: some View {
         ZStack {
             if let lastMove = board.getMoveLog().last {
                 if lastMove.isCheck == true {
                     ZStack {
-                        let (kingRow, kingCol) = self.board.getKingPosition(color: whiteMove ? "white" : "black")
+                        let (kingRow, kingCol) = self.board.getKingPosition(color: lastMove.piece.color == "black" ? "white" : "black")
                         let (displayRow, displayCol) = flipped ? (7 - kingRow, 7 - kingCol) : (kingRow, kingCol)
                         RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
                             .frame(width: squareSize, height: squareSize)
@@ -128,22 +124,19 @@ struct PiecesView: View {
                         }
                     }
                 }
-
+                
             }
             if showingPromotionDialog, let details = promotionDetails {
                 PromotionDialogOverlayView(details: details, size: squareSize * 8, onSelect: { piece in
                     details.3(piece)
-                    DispatchQueue.main.async {
-                        showingPromotionDialog = false
-                        moveSemaphore.signal()
-                    }
+                    showingPromotionDialog = false
                 })
             }
-            }
-            .onReceive(board.promotionPublisher) { details in
-                self.promotionDetails = details
-                self.showingPromotionDialog = true
-                moveSemaphore.wait()
+            
+        }
+        .onReceive(board.promotionPublisher) { details in
+            self.promotionDetails = details
+            self.showingPromotionDialog = true
         }
     }
     
@@ -181,21 +174,18 @@ struct PiecesView: View {
             enPassantPosition = nil
         }
     }
-
     private func movePiece(to newPos: (Int, Int)) {
         guard let piece = selectedPiece, let currentPosition = selectedPosition else { return }
         
         let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
         let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
-
+        
         if flipped {
             dragOffset = CGSize(width: colDiff, height: rowDiff)
-        }
-        else {
+        } else {
             dragOffset = CGSize(width: -colDiff, height: -rowDiff)
         }
         
-
         board.movePiece(piece: piece, newPosition: newPos)
 
         withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
@@ -214,20 +204,21 @@ struct PiecesView: View {
         isPieceSelected = false
         enPassantPosition = nil
         
-        let last = board.getMoveLog().last!
-        
-        var move = MoveData()
-        move.originalPosition = Position(x: last.oldPosition.0, y: last.oldPosition.1)
-        move.newPosition = Position(x: last.newPosition.0, y: last.newPosition.1)
-        move.isPromotion = last.isPromotion
-        move.pieceType = last.piece.pieceType
-        
-        print("piece type being moved is: \(move.pieceType)")
-        print("piece color being moves is: \(last.piece.color)")
-        print("was promotion?: \(move.isPromotion)")
-        print()
-        
-        onMoveMade(move)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            let last = board.getMoveLog().last!
+            
+            var move = MoveData()
+            move.originalPosition = Position(x: last.oldPosition.0, y: last.oldPosition.1)
+            move.newPosition = Position(x: last.newPosition.0, y: last.newPosition.1)
+            move.isPromotion = last.isPromotion
+            move.pieceType = last.piece.pieceType
+            
+            print("piece type being moved is: \(move.pieceType)")
+            print("piece color being moved is: \(last.piece.color)")
+            print("was promotion?: \(move.isPromotion)")
+            print()
+            
+            onMoveMade(move)
+        }
     }
-
 }

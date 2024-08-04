@@ -10,6 +10,7 @@ class Board: ObservableObject {
     var whiteKingPosition: (Int, Int)
     var test: Bool
     var promotionPublisher = PassthroughSubject<(Int, Int, String, (GamePiece) -> Void), Never>()
+    var cancellables = Set<AnyCancellable>()
     
     private var snapshots: [Int: Board] = [:]
     
@@ -320,19 +321,24 @@ class Board: ObservableObject {
             self.makeMove(piece: piece, fromPosition: piece.position, newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
         }
     }
-        
+    
     func movePawn(piece: GamePiece, newPosition: (Int, Int)) {
         let (row, col) = piece.position
         // Pawn promotion to queen
-        if piece.color == "white" && newPosition.0 == 0 || piece.color == "black" && newPosition.0 == 7 {
+        if piece.color == "white" && newPosition.0 == 0 || piece.color == "black" && newPosition.0 == 7 && !self.test{
             let capturedPiece = self.board[newPosition.0][newPosition.1]
             let originalPawn = self.board[row][col]
             self.board[row][col] = nil
-            self.handlePawnPromotion(newPosition: newPosition, color: piece.color) { newPiece in
-                DispatchQueue.main.async {
-                    self.makeMove(piece: newPiece, capturedPiece: capturedPiece, fromPosition: (row, col), newPosition: newPosition, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
-                }
+                    
+            handlePawnPromotion(newPosition: newPosition, color: piece.color)
+            .sink { [weak self] newPiece in
+                guard let self = self else { return }
+                self.makeMove(piece: newPiece, capturedPiece: capturedPiece, fromPosition: (row, col), newPosition: newPosition, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
             }
+            .store(in: &cancellables)
+//            self.handlePawnPromotion(newPosition: newPosition, color: piece.color) { newPiece in
+//                self.makeMove(piece: newPiece, capturedPiece: capturedPiece, fromPosition: (row, col), newPosition: newPosition, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
+//            }
         }
         // white en passant capture
         else if piece.color == "white" && row == 3 && self.board[newPosition.0][newPosition.1] == nil {
@@ -387,16 +393,23 @@ class Board: ObservableObject {
         }
     }
     
-    func handlePawnPromotion(newPosition: (Int, Int), color: String, completion: @escaping (GamePiece) -> Void) {
-        // Trigger the UI to show the promotion dialog
-        DispatchQueue.main.async {
-            
-            self.promotionPublisher.send((newPosition.0, newPosition.1, color, { piece in
-                completion(piece)
-            }))
+//    func handlePawnPromotion(newPosition: (Int, Int), color: String, completion: @escaping (GamePiece) -> Void) {
+//        DispatchQueue.main.async {
+//            self.promotionPublisher.send((newPosition.0, newPosition.1, color, { piece in
+//                completion(piece)
+//            }))
+//        }
+//    }
+    func handlePawnPromotion(newPosition: (Int, Int), color: String) -> Future<GamePiece, Never> {
+        return Future { [weak self] promise in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.promotionPublisher.send((newPosition.0, newPosition.1, color, { piece in
+                    promise(.success(piece))
+                }))
+            }
         }
     }
-    
     func getPiece(row: Int, col: Int) -> GamePiece? {
         return self.board[row][col]
     }

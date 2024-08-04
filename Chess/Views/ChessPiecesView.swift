@@ -158,9 +158,9 @@ struct ChessPiecesView: View {
         
         let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
         let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
-
+        
         dragOffset = CGSize(width: -colDiff, height: -rowDiff)
-
+        
         board.movePiece(piece: piece, newPosition: newPos)
         
         withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
@@ -170,7 +170,7 @@ struct ChessPiecesView: View {
         
         selectedMoveIndex = board.getMoveLog().count - 1
         isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
-
+        
         whiteMove.toggle()
         selectedPiece = nil
         selectedPosition = nil
