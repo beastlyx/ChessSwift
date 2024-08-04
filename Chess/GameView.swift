@@ -32,7 +32,7 @@ struct GameView: View {
                 topBar
                 
                 ZStack {
-                    ChessView(matchManager: matchManager, board: board, isWhite: matchManager.isWhite, onMoveMade: { move in
+                    ChessView(matchManager: matchManager, board: board, isWhite: matchManager.isWhite, currentlyMoving: matchManager.currentlyMoving, onMoveMade: { move in
                         moveMade = move
                         makeMove()
                     })

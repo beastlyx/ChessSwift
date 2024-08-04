@@ -18,25 +18,65 @@ struct MainMenuView: View {
                     .padding()
 
                 .background()
+                Spacer()
                 NavigationLink(destination: MenuView(matchManager: matchManager)) {
-                    Text("Play Against Player (comming soon)")
+                    Text("Play Against Player")
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 50)
+                    .background(
+                        Capsule(style: .circular)
+                            .fill(Color.blue)
+                            .frame(width: 250)
+                    )
+                    .foregroundColor(.white)
+                    .bold()
                 }
+
                 .padding()
 
                 NavigationLink(destination: ExplorerView()) {
                     Text("Explorer")
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 50)
+                    .background(
+                        Capsule(style: .circular)
+                            .fill(Color.blue)
+                            .frame(width: 250)
+                    )
+                    .foregroundColor(.white)
+                    .bold()
                 }
                 .padding()
 
                 NavigationLink(destination: AnalyzeGamesView()) {
                     Text("Analyze Previous Games")
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 50)
+                    .background(
+                        Capsule(style: .circular)
+                            .fill(Color.blue)
+                            .frame(width: 250)
+                    )
+                    .foregroundColor(.white)
+                    .bold()
                 }
                 .padding()
                 
                 NavigationLink(destination: AboutView()) {
                     Text("About")
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 50)
+                        .frame(width: 250)
+                        .background(
+                            Capsule(style: .circular)
+                                .fill(Color.blue)
+                        )
+                        .foregroundColor(.white)
+                        .bold()
                 }
                 .padding()
+                
+                Spacer()
             }
         }
     }
@@ -45,3 +85,8 @@ struct MainMenuView: View {
 #Preview {
     MainMenuView(matchManager: MatchManager())
 }
+//                .background(
+//                    Capsule(style: .circular)
+//                        .fill(Color("primaryYellow"))
+//                )
+//                .scaledToFit()

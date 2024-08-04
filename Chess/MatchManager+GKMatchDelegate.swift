@@ -2,27 +2,28 @@ import Foundation
 import GameKit
 
 extension MatchManager: GKMatchDelegate {
-//    func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
-//        receiveMove(data: data)
-//    }
     func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
-        if let content = try? JSONDecoder().decode(MoveData.self, from: data) {
-            receiveMove(data: data)
-        }
-        
-//        if content.starts(with: "strData:") {
-//            let message = content.replacing("strData:", with: "")
-//            receivedString(message)
-//        } else {
-//            do {
-//                try lastReceivedDrawing = PKDrawing(data: data)
-//            } catch {
-//                print(error)
-//            }
-//        }
+        receiveMove(data: data)
     }
+//    func match(_ match: GKMatch, didReceive data: Data, fromRemotePlayer player: GKPlayer) {
+//        if let content = try? JSONDecoder().decode(MoveData.self, from: data) {
+//            receiveMove(data: data)
+//        }
+//        
+////        if content.starts(with: "strData:") {
+////            let message = content.replacing("strData:", with: "")
+////            receivedString(message)
+////        } else {
+////            do {
+////                try lastReceivedDrawing = PKDrawing(data: data)
+////            } catch {
+////                print(error)
+////            }
+////        }
+//    }
     func sendMove(_ move: MoveData) {
         guard let data = try? JSONEncoder().encode(move) else { return }
+        self.swapRoles()
         try? match?.sendData(toAllPlayers: data, with: .reliable)
     }
     

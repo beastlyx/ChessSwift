@@ -13,12 +13,12 @@ struct MenuView: View {
         VStack {
             Spacer()
             
-            Image("logo")
-                .resizable()
-                .scaledToFit()
-                .padding(30)
+//            Image("logo")
+//                .resizable()
+//                .scaledToFit()
+//                .padding(30)
             
-            Spacer()
+            Spacer().frame(height: 700)
             
             Button {
                 matchManager.startMatchmaking()
@@ -34,16 +34,16 @@ struct MenuView: View {
             .padding(.horizontal, 100)
             .background(
                 Capsule(style: .circular)
-                    .fill(matchManager.authenticationState != .authenticated || matchManager.inGame ? .gray : Color("playBtn"))
+                    .fill(matchManager.authenticationState != .authenticated || matchManager.inGame ? .gray : Color("primaryYellow"))
             )
             Text(matchManager.authenticationState.rawValue)
                 .font(.headline.weight(.semibold))
-                .foregroundColor(Color("primaryYellow"))
+                .foregroundColor(Color.gray)
                 .padding()
             Spacer()
         }
         .background(
-        Image("menuBg")
+        Image("chessGame")
             .resizable()
             .scaledToFill()
             .scaleEffect(1.2)

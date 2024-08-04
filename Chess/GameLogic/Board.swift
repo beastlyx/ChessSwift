@@ -108,10 +108,10 @@ class Board: ObservableObject {
     }
     
     func applyMove(from: (Int, Int), to: (Int, Int), isPromotion: Bool, pieceType: String) {
-        if isPromotion == true {
-            if let color = getPiece(row: from.0, col: from.1)?.color {
-                let piece = createPiece(type: pieceType, color: color)
-                makeMove(piece: piece, capturedPiece: getPiece(row: to.0, col: to.1), fromPosition: from, newPosition: to, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: getPiece(row: from.0, col: from.1))
+        if isPromotion {
+            if let originalPawn = getPiece(row: from.0, col: from.1) {
+                let piece = createPiece(type: pieceType, color: originalPawn.color)
+                makeMove(piece: piece, capturedPiece: getPiece(row: to.0, col: to.1), fromPosition: from, newPosition: to, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
             }
         } else {
             if let piece = getPiece(row: from.0, col: from.1) {
@@ -390,6 +390,7 @@ class Board: ObservableObject {
     func handlePawnPromotion(newPosition: (Int, Int), color: String, completion: @escaping (GamePiece) -> Void) {
         // Trigger the UI to show the promotion dialog
         DispatchQueue.main.async {
+            
             self.promotionPublisher.send((newPosition.0, newPosition.1, color, { piece in
                 completion(piece)
             }))

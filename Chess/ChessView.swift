@@ -10,13 +10,12 @@ struct ChessView: View {
     @State private var whiteMove = true
     @State private var isMate: Bool = false
     @State private var selectedMoveIndex: Int? = nil
-    @State private var showingPromotionDialog = false
-    @State private var promotionDetails: (Int, Int, String, (GamePiece) -> Void)?
     @State private var lightSquareColor: Color = UserDefaults.standard.color(forKey: "lightSquareColor") ?? .white
     @State private var darkSquareColor: Color = UserDefaults.standard.color(forKey: "darkSquareColor") ?? Color(red: 218/255, green: 140/255, blue: 44/255)
     @State private var flipped = false
     
     var isWhite: Bool
+    var currentlyMoving: Bool
     var onMoveMade: (MoveData) -> Void
     
     var body: some View {
@@ -40,7 +39,7 @@ struct ChessView: View {
                     ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: flipped)
                         .frame(width: size, height: size)
 
-                    PiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, onMoveMade: onMoveMade, flipped: flipped)
+                    PiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, onMoveMade: onMoveMade, flipped: flipped, isWhite: isWhite, currentlyMoving: currentlyMoving)
                         .frame(width: size, height: size)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -64,21 +63,26 @@ struct ChessView: View {
                 
                 moveLog
                     .frame(width: 230, height: 200)
-                    .background(Color.gray.opacity(0.1))
+                    .background(Color.gray.opacity(0.6))
                     .cornerRadius(10)
                     .padding(.bottom, 20)
                     .padding(.trailing, 20)
                     .padding(.leading, 20)
 
             }
-            if showingPromotionDialog, let details = promotionDetails {
-                PromotionDialogOverlayView(details: details, size: size, onSelect: { piece in
-                    details.3(piece)
-                    showingPromotionDialog = false
-                })
-            }
+
+
         }
-        .background(Color.white)
+
+//        .background(Color.white)
+        .background(
+        Image("gameBg")
+            .resizable()
+            .scaledToFit()
+            .scaleEffect(1.6)
+            .opacity(0.4)
+        )
+        .ignoresSafeArea()
         .onAppear {
             self.flipped = !isWhite
         }
