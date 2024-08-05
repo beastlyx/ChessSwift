@@ -411,7 +411,11 @@ class Board: ObservableObject {
         }
     }
     func getPiece(row: Int, col: Int) -> GamePiece? {
-        return self.board[row][col]
+        if row < 0 || row > 7 || col < 0 || col > 7 {
+            return nil
+        }
+        guard let piece = self.board[row][col] else { return nil }
+        return piece
     }
     
     func getKingPosition(color: String) -> (Int, Int) {

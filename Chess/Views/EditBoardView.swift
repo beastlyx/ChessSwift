@@ -3,6 +3,8 @@ import SwiftUI
 struct EditBoardView: View {
     @Binding var lightSquareColor: Color
     @Binding var darkSquareColor: Color
+    @Binding var toggleSwitch: Bool
+    @Binding var flipped: Bool
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
@@ -17,6 +19,15 @@ struct EditBoardView: View {
             ColorPicker("Dark Square Color", selection: $darkSquareColor)
                 .padding()
 
+            if #available(iOS 17.0, *) {
+                Toggle("Flip board", isOn: $toggleSwitch)
+                    .onChange(of: toggleSwitch) { newValue, _ in
+                        flipped.toggle()
+                    }
+                    .padding()
+            } else {
+                // Fallback on earlier versions
+            }
             Spacer()
 
             Button("Done") {

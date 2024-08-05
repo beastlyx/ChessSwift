@@ -59,6 +59,7 @@ struct GameView: View {
             HStack {
                 Spacer().frame(width: 20)
                 Button {
+                    board.reset()
                     matchManager.match?.disconnect()
                     matchManager.resetGame()
                 } label: {
@@ -68,7 +69,7 @@ struct GameView: View {
                 }
                 Spacer()
                 
-                if matchManager.currentlyMoving {
+                if matchManager.currentlyMoving && matchManager.isWhite || !matchManager.currentlyMoving && !matchManager.isWhite {
                     Label {
                         Text("White to move")
                             .font(.title2)
@@ -82,7 +83,10 @@ struct GameView: View {
                     }
                 } else {
                     Label {
-                        Text("...")
+                        Text("Black to move")
+                            .font(.title2)
+                            .bold()
+                            .foregroundColor(Color.black)
                     } icon: {
                         Image("black-pawn")
                             .resizable()

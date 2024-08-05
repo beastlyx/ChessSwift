@@ -159,13 +159,18 @@ struct ChessPiecesView: View {
         let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
         let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
         
-        dragOffset = CGSize(width: -colDiff, height: -rowDiff)
+        if flipped {
+            dragOffset = CGSize(width: colDiff, height: rowDiff)
+        } else {
+            dragOffset = CGSize(width: -colDiff, height: -rowDiff)
+        }
         
         board.movePiece(piece: piece, newPosition: newPos)
         
         withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
             dragOffset = .zero
         }
+        
         board.undoneMoves.reset()
         
         selectedMoveIndex = board.getMoveLog().count - 1
@@ -178,6 +183,5 @@ struct ChessPiecesView: View {
         legalCaptures = []
         isPieceSelected = false
         enPassantPosition = nil
-        
     }
 }

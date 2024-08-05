@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SideMenuView: View {
     @Binding var showingEditBoardView: Bool
-
+    
     var body: some View {
         VStack {
 
