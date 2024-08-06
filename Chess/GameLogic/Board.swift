@@ -4,47 +4,63 @@ import Combine
 class Board: ObservableObject {
     @Published var board: [[GamePiece?]] = Array(repeating: Array(repeating: nil, count: 8), count: 8)
     @Published var moveLog: [MoveLog] = []
-    @Published var undoneMoves = BoardState()
-    var capturedPieces: CapturedPieces
-    var blackKingPosition: (Int, Int)
-    var whiteKingPosition: (Int, Int)
-    var test: Bool
-    var promotionPublisher = PassthroughSubject<(Int, Int, String, (GamePiece) -> Void), Never>()
-    var cancellables = Set<AnyCancellable>()
+//    @Published var undoneMoves = BoardState()
+    var capturedPiecesWhite: [String : Int] = [:]
+    var capturedPiecesBlack: [String : Int] = [:]
+    var blackKingPosition: Position
+    var whiteKingPosition: Position
+    var halfMove: Int = 0
+    var fullMove: Int = 0
+    var whiteTurn: Bool = true
     
-    private var snapshots: [Int: Board] = [:]
+    var test: Bool
+    var promotionPublisher = PassthroughSubject<(Position, String, (GamePiece) -> Void), Never>()
+    var cancellables = Set<AnyCancellable>()
+
     
     init() {
         moveLog = []
-        blackKingPosition = (0, 4)
-        whiteKingPosition = (7, 4)
+        blackKingPosition = Position(x: 0, y: 4)
+        whiteKingPosition = Position(x: 7, y: 4)
         test = false
-        capturedPieces = CapturedPieces()
-        
+        self.capturedPiecesBlack = [
+            "p" : 0,
+            "r" : 0,
+            "n" : 0,
+            "b" : 0,
+            "q" : 0
+        ]
+        self.capturedPiecesWhite = [
+            "P" : 0,
+            "R" : 0,
+            "N" : 0,
+            "B" : 0,
+            "Q" : 0
+        ]
         initializeBoard()
     }
     
     func initializeBoard() {
-        let rook_black_1 = Rook(row: 0, col: 0, color: "black", id: "1b")
-        let rook_white_1 = Rook(row: 7, col: 0, color: "white", id: "1w")
-        let rook_black_2 = Rook(row: 0, col: 7, color: "black", id: "2b")
-        let rook_white_2 = Rook(row: 7, col: 7, color: "white", id: "2w")
+        let rook_black_1 = Rook(position: Position(x: 0, y: 0), color: "black", id: "1b")
+        let rook_white_1 = Rook(position: Position(x: 7, y: 0), color: "white", id: "1w")
+        let rook_black_2 = Rook(position: Position(x: 0, y: 7), color: "black", id: "2b")
+        let rook_white_2 = Rook(position: Position(x: 7, y: 7), color: "white", id: "2w")
 
-        let bishop_black_1 = Bishop(row: 0, col: 2, color: "black")
-        let bishop_white_1 = Bishop(row: 7, col: 2, color: "white")
-        let bishop_black_2 = Bishop(row: 0, col: 5, color: "black")
-        let bishop_white_2 = Bishop(row: 7, col: 5, color: "white")
+        let bishop_black_1 = Bishop(position: Position(x: 0, y: 2), color: "black")
+        let bishop_white_1 = Bishop(position: Position(x: 7, y: 2), color: "white")
+        let bishop_black_2 = Bishop(position: Position(x: 0, y: 5), color: "black")
+        let bishop_white_2 = Bishop(position: Position(x: 7, y: 5), color: "white")
 
-        let knight_black_1 = Knight(row: 0, col: 1, color: "black")
-        let knight_white_1 = Knight(row: 7, col: 1, color: "white")
-        let knight_black_2 = Knight(row: 0, col: 6, color: "black")
-        let knight_white_2 = Knight(row: 7, col: 6, color: "white")
+        let knight_black_1 = Knight(position: Position(x: 0, y: 1), color: "black")
+        let knight_white_1 = Knight(position: Position(x: 7, y: 1), color: "white")
+        let knight_black_2 = Knight(position: Position(x: 0, y: 6), color: "black")
+        let knight_white_2 = Knight(position: Position(x: 7, y: 6), color: "white")
 
-        let queen_black = Queen(row: 0, col: 3, color: "black")
-        let queen_white = Queen(row: 7, col: 3, color: "white")
+        let queen_black = Queen(position: Position(x: 0, y: 3), color: "black")
+        let queen_white = Queen(position: Position(x: 7, y: 3), color: "white")
 
-        let king_black = King(row: 0, col: 4, color: "black")
-        let king_white = King(row: 7, col: 4, color: "white")
+        let king_black = King(position: Position(x: 0, y: 4), color: "black")
+        let king_white = King(position: Position(x: 7, y: 4), color: "white")
 
         self.board[0][0] = rook_black_1
         self.board[0][1] = knight_black_1
@@ -56,8 +72,8 @@ class Board: ObservableObject {
         self.board[0][7] = rook_black_2
 
         for i in 0..<8 {
-            self.board[1][i] = Pawn(row: 1, col: i, color: "black")
-            self.board[6][i] = Pawn(row: 6, col: i, color: "white")
+            self.board[1][i] = Pawn(position: Position(x: 1, y: i), color: "black")
+            self.board[6][i] = Pawn(position: Position(x: 6, y: i), color: "white")
         }
         
         self.board[7][0] = rook_white_1
@@ -72,13 +88,25 @@ class Board: ObservableObject {
     
     func reset() {
         self.moveLog = []
-        self.blackKingPosition = (0, 4)
-        self.whiteKingPosition = (7, 4)
+        self.blackKingPosition = Position(x: 0, y: 4)
+        self.whiteKingPosition = Position(x: 7, y: 4)
         self.test = false
         self.board = Array(repeating: Array(repeating: nil, count: 8), count: 8)
-        self.undoneMoves.reset()
-        self.capturedPieces.reset()
-        
+//        self.undoneMoves.reset()
+        self.capturedPiecesBlack = [
+            "p" : 0,
+            "r" : 0,
+            "n" : 0,
+            "b" : 0,
+            "q" : 0
+        ]
+        self.capturedPiecesWhite = [
+            "P" : 0,
+            "R" : 0,
+            "N" : 0,
+            "B" : 0,
+            "Q" : 0
+        ]
         initializeBoard()
     }
     
@@ -95,7 +123,6 @@ class Board: ObservableObject {
                 piece?.copy()
             }
         }
-        newBoard.capturedPieces = self.capturedPieces.deepCopy()
         return newBoard
     }
     
@@ -108,14 +135,14 @@ class Board: ObservableObject {
         }
     }
     
-    func applyMove(from: (Int, Int), to: (Int, Int), isPromotion: Bool, pieceType: String) {
+    func applyMove(from: Position, to: Position, isPromotion: Bool, pieceType: String) {
         if isPromotion {
-            if let originalPawn = getPiece(row: from.0, col: from.1) {
+            if let originalPawn = getPiece(position: from) {
                 let piece = createPiece(type: pieceType, color: originalPawn.color)
-                makeMove(piece: piece, capturedPiece: getPiece(row: to.0, col: to.1), fromPosition: from, newPosition: to, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
+                makeMove(piece: piece, capturedPiece: getPiece(position: to), fromPosition: from, newPosition: to, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
             }
         } else {
-            if let piece = getPiece(row: from.0, col: from.1) {
+            if let piece = getPiece(position: from) {
                 movePiece(piece: piece, newPosition: to)
             }
         }
@@ -124,142 +151,209 @@ class Board: ObservableObject {
     private func createPiece(type: String, color: String) -> GamePiece {
         switch type {
         case "queen":
-            return Queen(row: 0, col: 0, color: color)
+            return Queen(position: Position(x: 0, y: 0), color: color)
         case "rook":
-            return Rook(row: 0, col: 0, color: color, id: "\(color)-rook")
+            return Rook(position: Position(x: 0, y: 0), color: color, id: "\(color)-rook")
         case "bishop":
-            return Bishop(row: 0, col: 0, color: color)
+            return Bishop(position: Position(x: 0, y: 0), color: color)
         case "knight":
-            return Knight(row: 0, col: 0, color: color)
+            return Knight(position: Position(x: 0, y: 0), color: color)
         default:
-            return Pawn(row: 0, col: 0, color: color)
+            return Pawn(position: Position(x: 0, y: 0), color: color)
         }
     }
-    
-//    private func printSnapshot() {
-//        let keys = self.snapshots.keys.sorted()
-//        for key in keys {
-//            if let value = self.snapshots[key] {
-//                print("index: \(key)")
-//                print("board:")
-//                printBoard(board: value)
-//                print()
-//                print("MoveLog: \(value.moveLog.map {$0.move})")
-//                printCapturedPieces(cp: value.capturedPieces)
-//                print()
-//            } else {
-//                print("index: \(key)")
-//                print("value: nil")
-//                print()
-//            }
-//        }
-//    }
-//    private func printCapturedPieces(cp: CapturedPieces) {
-//        print("Captured White Pieces:")
-//        for (type, pieces) in cp.getWhiteCapturedPieces() {
-//            let piecesString = pieces.map { $0.pieceType }.joined(separator: ", ")
-//            print("\(type.capitalized): \(piecesString)")
-//        }
-//        
-//        print("\nCaptured Black Pieces:")
-//        for (type, pieces) in cp.getBlackCapturedPieces() {
-//            let piecesString = pieces.map { $0.pieceType }.joined(separator: ", ")
-//            print("\(type.capitalized): \(piecesString)")
-//        }
-//    }
-//    private func printBoard(board: Board) {
-//        for row in board.board {
-//            let rowString = row.map { piece -> String in
-//                if let piece = piece {
-//                    return piece.pieceType.padding(toLength: 10, withPad: " ", startingAt: 0)
-//                } else {
-//                    return "nil".padding(toLength: 10, withPad: " ", startingAt: 0)
-//                }
-//            }.joined(separator: " ")
-//            print(rowString)
-//        }
-//    }
+
     func setMove(index: Int) {
-//        printSnapshot()
-        let moves = self.getMoveLog() + self.undoneMoves.getUndoneMoves()
-        let length = moves.count
+        guard index >= 0 || index < self.getMoveLog().count else { return }
         
-        let logCount = self.getMoveLog().count
-        if index < logCount {
-            var movesToUndo = logCount - 1 - index
-            while !self.getMoveLog().isEmpty && movesToUndo > 0 {
-//                let move = self.getMoveLog().last
-//                if let capturedPiece = move?.capturedPiece {
-//                    self.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
-//                }
-                UndoMove(board: self).undo()
-                movesToUndo -= 1
-            }
-        } else if index < length {
-            var movesToRedo = index - logCount + 1
-            while !self.undoneMoves.getUndoneMoves().isEmpty && movesToRedo > 0 {
-                self.undoneMoves.redo()
-                movesToRedo -= 1
+        let fen = self.getMoveLog()[index].FEN
+        
+        let fenSplit = fen.split(separator: " ")
+        let rows = String(fenSplit[0]).split(separator: "/")
+        let turn = String(fenSplit[1])
+        let castleRights = String(fenSplit[2])
+        let enPassant = String(fenSplit[3])
+        let halfMove = String(fenSplit[4])
+        let fullMove = String(fenSplit[5])
+        
+        var newBoard: [[GamePiece?]] = Array(repeating: Array(repeating: nil, count: 8), count: 8)
+        
+        for (rowIndex, row) in rows.enumerated() {
+            var empty = 0
+            for col in row {
+                if let type = col.wholeNumberValue {
+                    empty += type
+                } else {
+                    newBoard[rowIndex][empty] = generatePiece(type: String(col), position: Position(x: rowIndex, y: empty))
+                    empty += 1
+                }
             }
         }
-    }
-    
-    func redoMove(selectedMoveIndex: Int?) -> Int? {
-        if !self.undoneMoves.getUndoneMoves().isEmpty {
-            self.undoneMoves.redo()
-            
-            let length = self.getMoveLog().count + self.undoneMoves.getUndoneMoves().count - 1
-            var index = selectedMoveIndex
-            if let moveIndex = selectedMoveIndex {
-                index = min(moveIndex + 1, length)
+        
+        self.board = newBoard
+        self.updateCapturedPieces()
+        self.whiteTurn = turn == "b" ? true : false
+        
+        if castleRights != "-" {
+            if let whiteKing = self.getPiece(position: self.getKingPosition(color: "white")) as? King, 
+                let blackKing = self.getPiece(position: self.getKingPosition(color: "black")) as? King {
+                
+                whiteKing.canCastleKingSide = false
+                whiteKing.canCastleQueenSide = false
+                
+                blackKing.canCastleKingSide = false
+                blackKing.canCastleQueenSide = false
+                
+                for char in castleRights {
+                    switch char {
+                    case "q":
+                        blackKing.canCastleQueenSide = true
+                    case "Q":
+                        whiteKing.canCastleQueenSide = true
+                    case "k":
+                        blackKing.canCastleKingSide = true
+                    case "K":
+                        blackKing.canCastleQueenSide = true
+                    default:
+                        continue
+                    }
+                }
+            }
+        }
+        
+        if enPassant != "-" {
+            let first = Array(enPassant)[0]
+            let second = Array(enPassant)[1]
+            if second == "3" {
+                // white piece enpassant
+                if let ascii = first.asciiValue {
+                    let col = Int(ascii) - Int(Character("a").asciiValue!)
+                    if let piece = self.getPiece(position: Position(x: 3, y: col)) as? Pawn {
+                        piece.isEnPassant = true
+                    }
+                }
             } else {
-                index = 0
+                // black piece enpassant
+                if let ascii = first.asciiValue {
+                    let col = Int(ascii) - Int(Character("a").asciiValue!)
+                    if let piece = self.getPiece(position: Position(x: 6, y: col)) as? Pawn {
+                        piece.isEnPassant = true
+                    }
+                }
             }
-            return index
         }
-        return selectedMoveIndex
+        
+        self.halfMove = Int(halfMove) ?? 0
+        self.fullMove = Int(fullMove) ?? 0
     }
     
-    func undoMove(selectedMoveIndex: Int?) -> Int? {
-        if !self.getMoveLog().isEmpty {
-//            let move = self.getMoveLog().last
-//            if let capturedPiece = move?.capturedPiece {
-//                self.capturedPieces.undoCapturedPiece(capturedPiece: capturedPiece)
-//            }
-            UndoMove(board: self).undo()
-            
-            var index = self.getMoveLog().count - 1
-            if let moveIndex = selectedMoveIndex {
-                index = moveIndex - 1
-            }
-            return index < 0 ? nil : index
+    private func generatePiece(type: String, position: Position) -> GamePiece? {
+        switch type {
+        case "q":
+            return Queen(position: position, color: "black")
+        case "Q":
+            return Queen(position: position, color: "white")
+        case "r":
+            return Rook(position: position, color: "black", id: "black-rook")
+        case "R":
+            return Rook(position: position, color: "white", id: "white-rook")
+        case "b":
+            return Bishop(position: position, color: "black")
+        case "B":
+            return Bishop(position: position, color: "white")
+        case "n":
+            return Knight(position: position, color: "black")
+        case "N":
+            return Knight(position: position, color: "white")
+        case "k":
+            return King(position: position, color: "black")
+        case "K":
+            return King(position: position, color: "white")
+        case "p":
+            return Pawn(position: position, color: "black")
+        case "P":
+            return Pawn(position: position, color: "white")
+        default:
+            return nil
         }
-        return selectedMoveIndex
     }
     
-//    func createSnapshot(at index: Int) {
-//        self.snapshots[index] = self.deepCopy()
-//    }
-//    
-//    func getSnapshot(at index: Int) -> Board? {
-//        return self.snapshots[index]
-//    }
-//    
-//    func findSnapshot(at index: Int) -> (index: Int, snapshot: Board) {
-//        let keys = self.snapshots.keys.sorted()
-//        if let closest = keys.last(where: { $0 <= index }) {
-//            if let snapshot = snapshots[closest] {
-//                return (closest, snapshot)
-//            }
-//        }
-//        return (index, self)
-//    }
+    func calculateWhitePoints() -> Int {
+        var whitePoints = 0
+        for (key, value) in self.capturedPiecesWhite {
+            switch key {
+            case "Q":
+                whitePoints += value > 0 ? (9 * value) : 0
+            case "R":
+                whitePoints += value > 0 ? (5 * value) : 0
+            case "B":
+                whitePoints += value > 0 ? (3 * value) : 0
+            case "N":
+                whitePoints += value > 0 ? (3 * value) : 0
+            case "P":
+                whitePoints += value > 0 ? (1 * value) : 0
+            default:
+                break
+            }
+        }
+        return whitePoints
+    }
+
+    func calculateBlackPoints() -> Int {
+        var blackPoints = 0
+        for (key, value) in self.capturedPiecesBlack {
+            switch key {
+            case "q":
+                blackPoints += value > 0 ? (9 * value) : 0
+            case "r":
+                blackPoints += value > 0 ? (5 * value) : 0
+            case "b":
+                blackPoints += value > 0 ? (3 * value) : 0
+            case "n":
+                blackPoints += value > 0 ? (3 * value) : 0
+            case "p":
+                blackPoints += value > 0 ? (1 * value) : 0
+            default:
+                break
+            }
+        }
+        return blackPoints
+    }
+
+    private func updateCapturedPieces() {
+        self.capturedPiecesBlack = [
+            "p" : 8,
+            "r" : 2,
+            "n" : 2,
+            "b" : 2,
+            "q" : 1
+        ]
+        self.capturedPiecesWhite = [
+            "P" : 8,
+            "R" : 2,
+            "N" : 2,
+            "B" : 2,
+            "Q" : 1
+        ]
+        
+        for row in 0..<8 {
+            for col in 0..<8 {
+                if let piece = self.getPiece(position: Position(x: row, y: col)), piece.pieceType != "king" {
+                    if piece.color == "black" {
+                        self.capturedPiecesBlack[piece.pieceCoordinates]! -= 1
+                    } else {
+                        self.capturedPiecesWhite[piece.pieceCoordinates]! -= 1
+                    }
+                }
+            }
+        }
+    }
     
-    func makeMove(piece: GamePiece?, capturedPiece: GamePiece? = nil, fromPosition: (Int, Int), newPosition: (Int, Int), isPromotion: Bool, isCastle: Bool, isEnPassant: Bool, originalPawn: GamePiece?) {
+    func makeMove(piece: GamePiece?, capturedPiece: GamePiece? = nil, fromPosition: Position, newPosition: Position, isPromotion: Bool, isCastle: Bool, isEnPassant: Bool, originalPawn: GamePiece?) {
         guard let piece = piece else { return }
         var capturedPiece = capturedPiece
-        let (newRow, newCol) = newPosition
-        let (currRow, currCol) = fromPosition
+        let (newRow, newCol) = newPosition.destructure()
+        let (currRow, currCol) = fromPosition.destructure()
         if capturedPiece == nil {
             capturedPiece = board[newRow][newCol]
         }
@@ -276,7 +370,7 @@ class Board: ObservableObject {
         self.board[currRow][currCol] = nil
         self.board[newRow][newCol] = nil
         self.board[newRow][newCol] = piece
-        piece.position = (newRow, newCol)
+        piece.position = Position(x: newRow, y: newCol)
         if piece.pieceType == "king" {
             if piece.color == "white" {
                 self.whiteKingPosition = newPosition
@@ -291,25 +385,28 @@ class Board: ObservableObject {
         }
         
         if (!self.test) {
-            if let capturedPiece = capturedPiece {
-                capturedPieces.capturePiece(capturedPiece: capturedPiece)
+            if let _ = capturedPiece, isPromotion == true {
+                self.halfMove = 0
+            } else {
+                self.halfMove += 1
             }
+            
+            if piece.color == "black" {
+                self.fullMove += 1
+            }
+            
             let move = MoveLog(board: self, piece: piece, capturedPiece: capturedPiece, oldPosition: fromPosition, newPosition: newPosition, isPromotion: isPromotion, isCastle: isCastle, isEnPassant: isEnPassant, originalPawn: originalPawn)
             move.addMove()
             self.moveLog.append(move.getMove())
             
-//            if moveLog.count % 5 == 0 {
-//                if snapshots[moveLog.count] == nil {
-//                    createSnapshot(at: moveLog.count)
-//                }
-//            }
+            self.updateCapturedPieces()
+            self.whiteTurn.toggle()
         }
     }
 
     
-    func movePiece(piece: GamePiece?, newPosition: (Int, Int), test: Bool = false) {//, legal_captures, test=False):
+    func movePiece(piece: GamePiece?, newPosition: Position, test: Bool = false) {//, legal_captures, test=False):
         self.test = test
-        // if self.board[new_pos[0]][new_pos[1]] is None or (self.board[new_pos[0]][new_pos[1]] is not None and (new_pos[0], new_pos[1]) in legal_captures):
         guard let piece = piece else { return }
         if piece.pieceType == "pawn" {
             self.movePawn(piece: piece, newPosition: newPosition)
@@ -322,18 +419,18 @@ class Board: ObservableObject {
         }
     }
     
-    func movePawn(piece: GamePiece, newPosition: (Int, Int)) {
-        let (row, col) = piece.position
+    func movePawn(piece: GamePiece, newPosition: Position) {
+        let (row, col) = piece.position.destructure()
         // Pawn promotion to queen
-        if piece.color == "white" && newPosition.0 == 0 || piece.color == "black" && newPosition.0 == 7 && !self.test{
-            let capturedPiece = self.board[newPosition.0][newPosition.1]
+        if piece.color == "white" && newPosition.x == 0 || piece.color == "black" && newPosition.x == 7 && !self.test {
+            let capturedPiece = self.board[newPosition.x][newPosition.y]
             let originalPawn = self.board[row][col]
             self.board[row][col] = nil
                     
             handlePawnPromotion(newPosition: newPosition, color: piece.color)
             .sink { [weak self] newPiece in
                 guard let self = self else { return }
-                self.makeMove(piece: newPiece, capturedPiece: capturedPiece, fromPosition: (row, col), newPosition: newPosition, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
+                self.makeMove(piece: newPiece, capturedPiece: capturedPiece, fromPosition: Position(x: row, y: col), newPosition: newPosition, isPromotion: true, isCastle: false, isEnPassant: false, originalPawn: originalPawn)
             }
             .store(in: &cancellables)
 //            self.handlePawnPromotion(newPosition: newPosition, color: piece.color) { newPiece in
@@ -341,47 +438,47 @@ class Board: ObservableObject {
 //            }
         }
         // white en passant capture
-        else if piece.color == "white" && row == 3 && self.board[newPosition.0][newPosition.1] == nil {
-            if newPosition == (row - 1, col - 1) || newPosition == (row - 1, col + 1) {
-                let pawn = self.getPiece(row: newPosition.0 + 1, col: newPosition.1)
-                self.makeMove(piece: piece, fromPosition: (row, col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: true, originalPawn: pawn)
+        else if piece.color == "white" && row == 3 && self.board[newPosition.x][newPosition.y] == nil {
+            if newPosition == Position(x: row - 1, y: col - 1) || newPosition == Position(x: row - 1, y: col + 1) {
+                let pawn = self.getPiece(position: Position(x: newPosition.x + 1, y: newPosition.y))
+                self.makeMove(piece: piece, fromPosition: Position(x: row, y: col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: true, originalPawn: pawn)
             }
             else {
-                self.makeMove(piece: piece, fromPosition: (row, col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
+                self.makeMove(piece: piece, fromPosition: Position(x: row, y: col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
             }
         }
         // black en passant capture
-        else if piece.color == "black" && row == 4 && self.board[newPosition.0][newPosition.1] == nil {
-            if newPosition == (row + 1, col - 1) || newPosition == (row + 1, col + 1) {
-                let pawn = self.getPiece(row: newPosition.0 - 1, col: newPosition.1)
-                self.makeMove(piece: piece, fromPosition: (row, col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: true, originalPawn: pawn)
+        else if piece.color == "black" && row == 4 && self.board[newPosition.x][newPosition.y] == nil {
+            if newPosition == Position(x: row + 1, y: col - 1) || newPosition == Position(x: row + 1, y: col + 1) {
+                let pawn = self.getPiece(position: Position(x: newPosition.x - 1, y: newPosition.y))
+                self.makeMove(piece: piece, fromPosition: Position(x: row, y: col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: true, originalPawn: pawn)
             }
             else {
-                self.makeMove(piece: piece, fromPosition: (row, col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
+                self.makeMove(piece: piece, fromPosition: Position(x: row, y: col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
             }
         }
         else {
-            self.makeMove(piece: piece, fromPosition: (row, col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
+            self.makeMove(piece: piece, fromPosition: Position(x: row, y: col), newPosition: newPosition, isPromotion: false, isCastle: false, isEnPassant: false, originalPawn: nil)
         }
     }
 
-    func moveKing(piece: GamePiece, newPosition: (Int, Int)) {
-        let (currRow, currCol) = piece.position
-        let isCastling = abs(currCol - newPosition.1) == 2
+    func moveKing(piece: GamePiece, newPosition: Position) {
+        let (currRow, currCol) = piece.position.destructure()
+        let isCastling = abs(currCol - newPosition.y) == 2
         if isCastling {
-            var rookInitialPosition: (Int, Int)
-            var rookFinalPosition: (Int, Int)
+            var rookInitialPosition: Position
+            var rookFinalPosition: Position
             // Kingside castling
-            if newPosition.1 > currCol {
-                rookInitialPosition = (currRow, 7)
-                rookFinalPosition = (newPosition.0, newPosition.1 - 1)
+            if newPosition.y > currCol {
+                rookInitialPosition = Position(x: currRow, y: 7)
+                rookFinalPosition = Position(x: newPosition.x, y: newPosition.y - 1)
             }
             // Queenside castling
             else {
-                rookInitialPosition = (currRow, 0)
-                rookFinalPosition = (newPosition.0, newPosition.1 + 1)
+                rookInitialPosition = Position(x: currRow, y: 0)
+                rookFinalPosition = Position(x: newPosition.x, y: newPosition.y + 1)
             }
-            let rook = self.board[rookInitialPosition.0][rookInitialPosition.1]
+            let rook = self.board[rookInitialPosition.x][rookInitialPosition.y]
             // king's move
             self.makeMove(piece: piece, fromPosition: piece.position, newPosition: newPosition, isPromotion: false, isCastle: true, isEnPassant: false, originalPawn: nil)
             // rook's move
@@ -400,17 +497,18 @@ class Board: ObservableObject {
 //            }))
 //        }
 //    }
-    func handlePawnPromotion(newPosition: (Int, Int), color: String) -> Future<GamePiece, Never> {
+    func handlePawnPromotion(newPosition: Position, color: String) -> Future<GamePiece, Never> {
         return Future { [weak self] promise in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                self.promotionPublisher.send((newPosition.0, newPosition.1, color, { piece in
+                self.promotionPublisher.send((newPosition, color, { piece in
                     promise(.success(piece))
                 }))
             }
         }
     }
-    func getPiece(row: Int, col: Int) -> GamePiece? {
+    func getPiece(position: Position) -> GamePiece? {
+        let (row, col) = position.destructure()
         if row < 0 || row > 7 || col < 0 || col > 7 {
             return nil
         }
@@ -418,7 +516,7 @@ class Board: ObservableObject {
         return piece
     }
     
-    func getKingPosition(color: String) -> (Int, Int) {
+    func getKingPosition(color: String) -> Position {
         return color == "white" ? self.whiteKingPosition : self.blackKingPosition
     }
     

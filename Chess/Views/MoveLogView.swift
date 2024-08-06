@@ -14,7 +14,7 @@ struct MoveLogView: View {
     @Binding var isMate: Bool
     
     var body: some View {
-        let moves = board.getMoveLog() + board.undoneMoves.getUndoneMoves()
+        let moves = board.getMoveLog()
         ScrollView {
             Spacer().frame(width: 1, height: 10)
             VStack(alignment: .leading, spacing: 2) {
@@ -71,7 +71,7 @@ struct MoveLogView: View {
     
     private func setMove(index: Int) {
         board.setMove(index: index)
-        whiteMove = board.getMoveLog().last?.piece.color == "white" ? false : true
+        whiteMove = board.whiteTurn
         isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
     }
 }

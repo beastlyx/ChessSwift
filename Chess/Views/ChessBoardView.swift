@@ -5,6 +5,8 @@ struct ChessBorderView: View {
     var color1: Color
     var color2: Color
     var flipped: Bool
+    @Binding var lastMoveOriginal: Position?
+    @Binding var lastMoveNew: Position?
     var columnCoordinates = ["a", "b", "c", "d", "e", "f", "g", "h"]
     var rowCoordinates = ["1", "2", "3", "4", "5", "6", "7", "8"]
     
@@ -45,7 +47,7 @@ struct ChessBorderView: View {
                     }
                 }
             }
-            ChessBoardView(squareSize: boardSize / 8, color1: color1, color2: color2, flipped: flipped)
+            ChessBoardView(squareSize: boardSize / 8, color1: color1, color2: color2, flipped: flipped, lastMoveOriginal: $lastMoveOriginal, lastMoveNew: $lastMoveNew)
                 .frame(width: boardSize, height: boardSize)
         }
         .frame(width: boardSize, height: boardSize)
@@ -58,6 +60,9 @@ struct ChessBoardView: View {
     var color1: Color
     var color2: Color
     var flipped: Bool
+    @Binding var lastMoveOriginal: Position?
+    @Binding var lastMoveNew: Position?
+    
     var columnCoordinates = ["a", "b", "c", "d", "e", "f", "g", "h"]
     var rowCoordinates = ["1", "2", "3", "4", "5", "6", "7", "8"]
 
@@ -72,6 +77,21 @@ struct ChessBoardView: View {
                             Rectangle()
                                 .fill((displayRow + displayCol) % 2 == 0 ? color1 : color2)
                                 .frame(width: squareSize, height: squareSize)
+                            
+                            if let lastMoveNew = lastMoveNew, let lastMoveOriginal = lastMoveOriginal {
+                                if Position(x: row, y: col) == lastMoveNew {
+                                    Rectangle()
+                                        .fill(.blue)
+                                        .frame(width: squareSize, height: squareSize)
+                                        .opacity(0.45)
+                                }
+                                if Position(x: row, y: col) == lastMoveOriginal {
+                                    Rectangle()
+                                        .fill(.blue)
+                                        .frame(width: squareSize, height: squareSize)
+                                        .opacity(0.25)
+                                }
+                            }
                         }
                     }
                 }
@@ -79,3 +99,16 @@ struct ChessBoardView: View {
         }
     }
 }
+//if let lastMoveOriginal = lastMoveOriginal, let lastMoveNew = lastMoveNew {
+//    // highlight starting square of last move made light blue
+//    RadialGradient(colors: [.blue, .blue], center: .center, startRadius: 15, endRadius: 30)
+//        .frame(width: squareSize, height: squareSize)
+//        .position(x: CGFloat(lastMoveOriginal.y) * (squareSize) + (squareSize / 2) * 1.43, y: CGFloat(lastMoveOriginal.x) * (squareSize) + (squareSize / 2) * 1.44)
+//        .opacity(0.3)
+//    
+//    // highlight ending square of last move made darker blue
+//    RadialGradient(colors: [.blue, .blue], center: .center, startRadius: 15, endRadius: 30)
+//        .frame(width: squareSize, height: squareSize)
+//        .position(x: CGFloat(lastMoveNew.y) * (squareSize) + (squareSize / 2) * 1.43, y: CGFloat(lastMoveNew.x) * (squareSize) + (squareSize / 2) * 1.44)
+//        .opacity(0.6)
+//}

@@ -6,9 +6,9 @@ struct PiecesView: View {
     @ObservedObject var board: Board
     var squareSize: CGFloat
     @Binding var selectedPiece: GamePiece?
-    @Binding var legalMoves: [(Int, Int)]
-    @Binding var legalCaptures: [(Int, Int)]
-    @Binding var selectedPosition: (Int, Int)?
+    @Binding var legalMoves: Set<Position>
+    @Binding var legalCaptures: Set<Position>
+    @Binding var selectedPosition: Position?
     @Binding var whiteMove: Bool
     @Binding var isMate: Bool
     @Binding var selectedMoveIndex: Int?
@@ -22,12 +22,13 @@ struct PiecesView: View {
     @State private var dragOffset = CGSize.zero
     @State private var draggedPiece: GamePiece?
     @State private var dragPosition: CGPoint = .zero
-    @State private var initialPosition: (Int, Int)?
-    @State private var enPassantPosition: (Int, Int)?
+    @State private var initialPosition: Position?
+    @State private var enPassantPosition: Position?
     @State private var glowOpacity = 0.3
     @State private var showingPromotionDialog = false
-    @State private var promotionDetails: (Int, Int, String, (GamePiece) -> Void)?
-
+    @State private var promotionDetails: (Position, String, (GamePiece) -> Void)?
+    @State private var lastMovedPiece: GamePiece?
+    
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     let checkFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
@@ -36,7 +37,7 @@ struct PiecesView: View {
             if let lastMove = board.getMoveLog().last {
                 if lastMove.isCheck == true {
                     ZStack {
-                        let (kingRow, kingCol) = self.board.getKingPosition(color: lastMove.piece.color == "black" ? "white" : "black")
+                        let (kingRow, kingCol) = self.board.getKingPosition(color: lastMove.piece.color == "black" ? "white" : "black").destructure()
                         let (displayRow, displayCol) = flipped ? (7 - kingRow, 7 - kingCol) : (kingRow, kingCol)
                         RadialGradient(colors: [.red, .clear], center: .center, startRadius: 10, endRadius: 30)
                             .frame(width: squareSize, height: squareSize)
@@ -59,19 +60,20 @@ struct PiecesView: View {
                         ForEach(0..<8, id: \.self) { col in
                             let displayRow = flipped ? 7 - row : row
                             let displayCol = flipped ? 7 - col : col
+                            let position = Position(x: displayRow, y: displayCol)
                             ZStack {
-                                if let ep = enPassantPosition, ep == (displayRow, displayCol) {
+                                if let ep = enPassantPosition, ep == position {
                                     RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                         .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
                                     
                                 }
-                                if legalMoves.contains(where: { $0 == (displayRow, displayCol)}) {
-                                    if legalCaptures.contains(where: { $0 == (displayRow, displayCol) }) {
+                                if legalMoves.contains(where: { $0 == position}) {
+                                    if legalCaptures.contains(where: { $0 == position }) {
                                         RadialGradient(colors: [.red, .red], center: .center, startRadius: 15, endRadius: 30)
                                             .position(x: CGFloat(squareSize * 0.5), y: CGFloat(squareSize * 0.5))
                                             .onTapGesture {
                                                 feedbackGenerator.impactOccurred()
-                                                movePiece(to: (displayRow, displayCol))
+                                                movePiece(to: position)
                                             }
                                     } else {
                                         Circle()
@@ -80,17 +82,17 @@ struct PiecesView: View {
                                             .frame(width: squareSize * 0.3, height: squareSize * 0.3)
                                             .onTapGesture {
                                                 feedbackGenerator.impactOccurred()
-                                                movePiece(to: (displayRow, displayCol))
+                                                movePiece(to: position)
                                             }
                                     }
                                 }
-                                if let piece = board.getPiece(row: displayRow, col: displayCol) {
+                                if let piece = board.getPiece(position: position) {
                                     Image(uiImage: piece.img!)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .frame(width: squareSize, height: squareSize)
                                         .scaledToFit()
-                                        .scaleEffect(isSelectedPosition(row: displayRow, col: displayCol) ? 1.2 : 1.0)
+                                        .scaleEffect(isSelectedPosition(position: position) ? 1.2 : 1.0)
                                         .animation(.easeInOut(duration: 0.2), value: isPieceSelected)
                                         .shadow(color: Color.black.opacity(0.4), radius: 2, x: 1, y: 1)
                                         .offset(
@@ -101,10 +103,10 @@ struct PiecesView: View {
                                         .rotationEffect(isMate && piece.pieceType == "king" && (piece.color == "white" && whiteMove || piece.color == "black" && !whiteMove) ? .degrees(-90) : .degrees(0))
                                         .onTapGesture {
                                             feedbackGenerator.impactOccurred()
-                                            if legalCaptures.contains(where: { $0 == (displayRow, displayCol) }) {
-                                                movePiece(to: (displayRow, displayCol))
+                                            if legalCaptures.contains(where: { $0 == position }) {
+                                                movePiece(to: position)
                                             } else {
-                                                selectPiece(piece: piece, at: (displayRow, displayCol))
+                                                selectPiece(piece: piece, at: position)
                                             }
                                         }
                                     
@@ -128,7 +130,7 @@ struct PiecesView: View {
             }
             if showingPromotionDialog, let details = promotionDetails {
                 PromotionDialogOverlayView(details: details, size: squareSize * 8, onSelect: { piece in
-                    details.3(piece)
+                    details.2(piece)
                     showingPromotionDialog = false
                 })
             }
@@ -142,21 +144,21 @@ struct PiecesView: View {
     
     private func getEnPassantPosition() {
         if let selectedPiece = selectedPiece as? Pawn, selectedPiece.isEnPassant {
-            enPassantPosition = (selectedPiece.enPassantPosition.0, selectedPiece.enPassantPosition.1)
+            enPassantPosition = selectedPiece.enPassantPosition
         }
         else {
             enPassantPosition = nil
         }
     }
     
-    private func isSelectedPosition(row: Int, col: Int) -> Bool {
+    private func isSelectedPosition(position: Position) -> Bool {
         if let selectedPosition = selectedPosition {
-            return selectedPosition == (row, col)
+            return selectedPosition == position
         }
         return false
     }
     
-    private func selectPiece(piece: GamePiece, at position: (Int, Int)) {
+    private func selectPiece(piece: GamePiece, at position: Position) {
         if currentlyMoving && (isWhite && piece.color == "white" || !isWhite && piece.color == "black") {
             selectedPiece = piece
             selectedPosition = position
@@ -174,11 +176,11 @@ struct PiecesView: View {
             enPassantPosition = nil
         }
     }
-    private func movePiece(to newPos: (Int, Int)) {
+    private func movePiece(to newPos: Position) {
         guard let piece = selectedPiece, let currentPosition = selectedPosition else { return }
         
-        let rowDiff = CGFloat(newPos.0 - currentPosition.0) * squareSize
-        let colDiff = CGFloat(newPos.1 - currentPosition.1) * squareSize
+        let rowDiff = CGFloat(newPos.x - currentPosition.x) * squareSize
+        let colDiff = CGFloat(newPos.y - currentPosition.y) * squareSize
         
         if flipped {
             dragOffset = CGSize(width: colDiff, height: rowDiff)
@@ -191,12 +193,12 @@ struct PiecesView: View {
         withAnimation(Animation.interpolatingSpring(stiffness: 140, damping: 25, initialVelocity: 15)) {
             dragOffset = .zero
         }
-        board.undoneMoves.reset()
+//        board.undoneMoves.reset()
         
         selectedMoveIndex = board.getMoveLog().count - 1
         isMate = board.getMoveLog().last?.isCheckmate == true ? true : false
         
-        whiteMove.toggle()
+        whiteMove = board.whiteTurn
         selectedPiece = nil
         selectedPosition = nil
         legalMoves = []
@@ -208,15 +210,10 @@ struct PiecesView: View {
             let last = board.getMoveLog().last!
             
             var move = MoveData()
-            move.originalPosition = Position(x: last.oldPosition.0, y: last.oldPosition.1)
-            move.newPosition = Position(x: last.newPosition.0, y: last.newPosition.1)
+            move.originalPosition = last.oldPosition
+            move.newPosition = last.newPosition
             move.isPromotion = last.isPromotion
             move.pieceType = last.piece.pieceType
-            
-            print("piece type being moved is: \(move.pieceType)")
-            print("piece color being moved is: \(last.piece.color)")
-            print("was promotion?: \(move.isPromotion)")
-            print()
             
             onMoveMade(move)
         }

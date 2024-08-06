@@ -24,8 +24,8 @@ struct GameView: View {
             var lastMove = self.board.moveLog.last!
             
             var move = MoveData()
-            move.originalPosition = Position(x: lastMove.oldPosition.0, y: lastMove.oldPosition.1)
-            move.newPosition = Position(x: lastMove.newPosition.0, y: lastMove.newPosition.1)
+            move.originalPosition = Position(x: lastMove.oldPosition.x, y: lastMove.oldPosition.y)
+            move.newPosition = Position(x: lastMove.newPosition.x, y: lastMove.newPosition.y)
             move.isPromotion = lastMove.isPromotion
             move.pieceType = lastMove.piece.pieceType
             

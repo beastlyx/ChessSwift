@@ -4,15 +4,17 @@ struct ChessView: View {
     @ObservedObject var matchManager: MatchManager
     @ObservedObject var board: Board
     @State private var selectedPiece: GamePiece?
-    @State private var legalMoves: [(Int, Int)] = []
-    @State private var legalCaptures: [(Int, Int)] = []
-    @State private var selectedPosition: (Int, Int)?
+    @State private var legalMoves: Set<Position> = Set()
+    @State private var legalCaptures: Set<Position> = Set()
+    @State private var selectedPosition: Position?
     @State private var whiteMove = true
     @State private var isMate: Bool = false
     @State private var selectedMoveIndex: Int? = nil
     @State private var lightSquareColor: Color = UserDefaults.standard.color(forKey: "lightSquareColor") ?? .white
     @State private var darkSquareColor: Color = UserDefaults.standard.color(forKey: "darkSquareColor") ?? Color(red: 218/255, green: 140/255, blue: 44/255)
     @State private var flipped = false
+    @State private var lastMoveOriginal: Position?
+    @State private var lastMoveNew: Position?
     
     var isWhite: Bool
     var currentlyMoving: Bool
@@ -23,7 +25,7 @@ struct ChessView: View {
             let size = min(geometry.size.width, geometry.size.height * 0.7)
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    CapturedPiecesView(capturedPieces: board.capturedPieces.getWhiteCapturedPieces())
+                    CapturedPiecesView(capturedPieces: board.capturedPiecesWhite)
                     Spacer()
                     if let pointDifference = pointDifference(), pointDifference > 0 {
                         Text("+\(pointDifference)")
@@ -36,7 +38,7 @@ struct ChessView: View {
 
                 ZStack {
                     let squareSize = size / 8
-                    ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: flipped)
+                    ChessBorderView(squareSize: squareSize, color1: lightSquareColor, color2: darkSquareColor, flipped: flipped, lastMoveOriginal: $lastMoveOriginal, lastMoveNew: $lastMoveNew)
                         .frame(width: size, height: size)
 
                     PiecesView(board: board, squareSize: squareSize * 0.95, selectedPiece: $selectedPiece, legalMoves: $legalMoves, legalCaptures: $legalCaptures, selectedPosition: $selectedPosition, whiteMove: $whiteMove, isMate: $isMate, selectedMoveIndex: $selectedMoveIndex, onMoveMade: onMoveMade, flipped: flipped, isWhite: isWhite, currentlyMoving: currentlyMoving)
@@ -48,12 +50,12 @@ struct ChessView: View {
                             legalCaptures = []
                             selectedPosition = nil
                         }
-                        .onChange(of: matchManager.lastReceivedMove) { newMove in
+                        .onChange(of: matchManager.lastReceivedMove) { newMove, _ in
                             applyMove(newMove)
                         }
                 }
                 HStack(spacing: 0) {
-                    CapturedPiecesView(capturedPieces: board.capturedPieces.getBlackCapturedPieces())
+                    CapturedPiecesView(capturedPieces: board.capturedPiecesBlack)
                     Spacer()
                     if let pointDifference = pointDifference(), pointDifference < 0 {
                         Text("+\(-pointDifference)")
@@ -92,14 +94,14 @@ struct ChessView: View {
     }
     
     private func applyMove(_ move: MoveData) {
-        let originalPosition = (move.originalPosition.x, move.originalPosition.y)
-        let newPosition = (move.newPosition.x, move.newPosition.y)
+        let originalPosition = move.originalPosition
+        let newPosition = move.newPosition
         self.board.applyMove(from: originalPosition, to: newPosition, isPromotion: move.isPromotion, pieceType: move.pieceType)
     }
     
     private func pointDifference() -> Int? {
-        let whitePoints = board.capturedPieces.calculateWhitePoints()
-        let blackPoints = board.capturedPieces.calculateBlackPoints()
+        let whitePoints = board.calculateWhitePoints()
+        let blackPoints = board.calculateBlackPoints()
         return whitePoints - blackPoints
     }
 

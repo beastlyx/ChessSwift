@@ -4,9 +4,10 @@ class MoveLog {
     var piece: GamePiece
 //    var moveLog: [MoveLog]
 //    var capturedPieces: CapturedPieces
+    var FEN: String = ""
     var capturedPiece: GamePiece?
-    var oldPosition: (Int, Int)
-    var newPosition: (Int, Int)
+    var oldPosition: Position
+    var newPosition: Position
     var isPromotion: Bool
     var isCastle: Bool
     var isEnPassant: Bool
@@ -21,7 +22,7 @@ class MoveLog {
     var checkmate: String = ""
     var isCheckmate: Bool = false
     
-    init(board: Board, piece: GamePiece, capturedPiece: GamePiece?, oldPosition: (Int, Int), newPosition: (Int, Int), isPromotion: Bool, isCastle: Bool, isEnPassant: Bool, originalPawn: GamePiece?) {
+    init(board: Board, piece: GamePiece, capturedPiece: GamePiece?, oldPosition: Position, newPosition: Position, isPromotion: Bool, isCastle: Bool, isEnPassant: Bool, originalPawn: GamePiece?) {
         self.board = board
 //        self.moveLog = self.board.getMoveLog()
 //        self.capturedPieces = self.board.capturedPieces
@@ -33,15 +34,89 @@ class MoveLog {
         self.isPromotion = isPromotion
         self.isCastle = isCastle
         self.isEnPassant = isEnPassant
-        self.duplicate = self.checkForDuplicatMoves()
+        self.duplicate = self.checkForDuplicateMoves()
+        self.FEN = self.setFEN()
+    }
+    
+    func setFEN() -> String {
+        var fen = ""
+        var castleRightWhiteKingSide = ""
+        var castleRightWhiteQueenSide = ""
+        var castleRightBlackKingSide = ""
+        var castleRightBlackQueenSide = ""
+        var enPassant = ""
+        
+        for row in 0..<8 {
+            var empty = 0
+            var colFEN = ""
+            for col in 0..<8 {
+                if let piece = board.getPiece(position: Position(x: row, y: col)) {
+                    colFEN = empty == 0 ? colFEN + piece.pieceCoordinates : colFEN + String(empty) + piece.pieceCoordinates
+                    empty = 0
+                    
+                    if piece.pieceType == "king" {
+                        if let king = piece as? King {
+                            if king.color == "white" {
+                                castleRightWhiteKingSide = king.canCastleKingSide ? king.pieceCoordinates : ""
+                                castleRightWhiteQueenSide = king.canCastleQueenSide ? "Q" : ""
+                            } else {
+                                castleRightBlackKingSide = king.canCastleKingSide ? king.pieceCoordinates : ""
+                                castleRightBlackQueenSide = king.canCastleQueenSide ? "q" : ""
+                            }
+                        }
+                    }
+                    
+                    if piece.pieceType == "pawn" && abs(self.oldPosition.x - self.newPosition.x) == 2 {
+                        if piece.color == "white" {
+                            enPassant += columnCoordinates[self.newPosition.y] + rowCoordinates[self.newPosition.x + 1] + " "
+                        } else {
+                            enPassant += columnCoordinates[self.newPosition.y] + rowCoordinates[self.newPosition.x - 1] + " "
+                        }
+                    }
+                } else {
+                    empty += 1
+                }
+            }
+            if empty != 0 {
+                fen += colFEN + String(empty) + "/"
+            } else {
+                fen += colFEN
+                
+                if row < 7 {
+                    fen += "/"
+                }
+            }
+        }
+        
+        fen += self.piece.color == "white" ? " b " : " w "
+
+        if castleRightWhiteKingSide.isEmpty && castleRightWhiteQueenSide.isEmpty {
+            fen += "- "
+        } else if !castleRightWhiteKingSide.isEmpty || !castleRightWhiteQueenSide.isEmpty {
+            fen += castleRightWhiteKingSide + castleRightWhiteQueenSide + " "
+        } else if castleRightBlackKingSide.isEmpty && castleRightBlackQueenSide.isEmpty {
+            fen += "- "
+        } else if !castleRightBlackKingSide.isEmpty || !castleRightBlackQueenSide.isEmpty {
+            fen += castleRightBlackKingSide + castleRightBlackQueenSide + " "
+        }
+        
+        if enPassant.isEmpty {
+            fen += "- "
+        } else {
+            fen += enPassant
+        }
+        
+        fen += String(self.board.halfMove) + " " + String(self.board.fullMove)
+        
+        return fen
     }
     
     func logMove() {
         let coordinate = ""
-        let oldRow = self.rowCoordinates[self.oldPosition.0]
-        let oldCol = self.columnCoordinates[self.oldPosition.1]
-        let newCol = self.columnCoordinates[self.newPosition.1]
-        let newRow = self.rowCoordinates[self.newPosition.0]
+        let oldRow = self.rowCoordinates[self.oldPosition.x]
+        let oldCol = self.columnCoordinates[self.oldPosition.y]
+        let newCol = self.columnCoordinates[self.newPosition.y]
+        let newRow = self.rowCoordinates[self.newPosition.x]
         
         if self.piece.pieceType == "pawn" {
             self.logMovePawn()
@@ -52,7 +127,7 @@ class MoveLog {
         }
         else if self.duplicate {
             let otherPosition = self.checkSameMove()
-            if otherPosition.0 != self.oldPosition.0 {
+            if otherPosition.x != self.oldPosition.x {
                 self.move = "\(coordinate)\(oldRow)\(self.capture)\(newCol)\(newRow)\(self.kingInCheck)\(self.checkmate)"
             }
             else {
@@ -66,8 +141,8 @@ class MoveLog {
     
     func logMovePawn() {
         if self.capturedPiece == nil {
-            let toCol = self.columnCoordinates[self.newPosition.1]
-            let toRow = self.rowCoordinates[self.newPosition.0]
+            let toCol = self.columnCoordinates[self.newPosition.y]
+            let toRow = self.rowCoordinates[self.newPosition.x]
             let coordinate = self.piece.pieceCoordinates
             
             if self.piece.pieceType == "pawn" {
@@ -78,9 +153,9 @@ class MoveLog {
             }
         }
         else {
-            let fromCol = self.columnCoordinates[self.oldPosition.1]
-            let toCol = self.columnCoordinates[self.newPosition.1]
-            let toRow = self.rowCoordinates[self.newPosition.0]
+            let fromCol = self.columnCoordinates[self.oldPosition.y]
+            let toCol = self.columnCoordinates[self.newPosition.y]
+            let toRow = self.rowCoordinates[self.newPosition.x]
             let coordinate = self.piece.pieceCoordinates
             
             if self.piece.pieceType == "pawn" {
@@ -98,7 +173,7 @@ class MoveLog {
     }
     
     func logMoveCastle() {
-        if self.newPosition.1 == 6 {
+        if self.newPosition.y == 6 {
             self.move = "0-0\(self.kingInCheck)\(self.checkmate)"
         }
         else {
@@ -106,24 +181,15 @@ class MoveLog {
         }
     }
     
-    func checkForDuplicatMoves() -> Bool {
+    func checkForDuplicateMoves() -> Bool {
         let otherPiecePosition = self.checkSameMove()
-        if otherPiecePosition != (-1, -1) {
-            if let otherPiece = self.board.getPiece(row: otherPiecePosition.0, col: otherPiecePosition.1) {
-                let otherPieceMoves: [(Int, Int)] = otherPiece.setLegalMoves(board: self.board)
-                let currentPieceMoves: [(Int, Int)] = self.piece.setLegalMoves(board: self.board)
+        if otherPiecePosition != Position(x: -1, y: -1) {
+            if let otherPiece = self.board.getPiece(position: otherPiecePosition) {
+                let otherPieceMoves: Set<Position> = otherPiece.setLegalMoves(board: self.board)
+                let currentPieceMoves: Set<Position> = self.piece.setLegalMoves(board: self.board)
                 
-                var uniqueMoves: [(Int, Int)] = []
-                for move in otherPieceMoves {
-                    if !uniqueMoves.contains(where: { $0 == move }) {
-                        uniqueMoves.append(move)
-                    }
-                }
-                for move in currentPieceMoves {
-                    if !uniqueMoves.contains(where: { $0 == move }) {
-                        uniqueMoves.append(move)
-                    }
-                }
+                var uniqueMoves: Set<Position> = Set()
+                uniqueMoves = otherPieceMoves.union(currentPieceMoves)
                 
                 return uniqueMoves.contains(where: { $0 == self.newPosition })
             }
@@ -131,22 +197,22 @@ class MoveLog {
         return false
     }
     
-    func checkSameMove() -> (Int, Int) {
+    func checkSameMove() -> Position {
         if self.piece.pieceType == "pawn" {
-            return (-1, -1)
+            return Position(x: -1, y: -1)
         }
         let oldPos = self.oldPosition
         let newPos = self.newPosition
         for row in 0..<8 {
             for col in 0..<8 {
-                if let duplicatePiece = self.board.getPiece(row: row, col: col), duplicatePiece.pieceType == self.piece.pieceType {
-                    if duplicatePiece.color == self.piece.color && newPos != (row, col) && oldPos != (row, col) {
-                        return (row, col)
+                if let duplicatePiece = self.board.getPiece(position: Position(x: row, y: col)), duplicatePiece.pieceType == self.piece.pieceType {
+                    if duplicatePiece.color == self.piece.color && newPos != Position(x: row, y: col) && oldPos != Position(x: row, y: col) {
+                        return Position(x: row, y: col)
                     }
                 }
             }
         }
-        return (-1, -1)
+        return Position(x: -1, y: -1)
     }
     
     func addMove() {
@@ -155,7 +221,7 @@ class MoveLog {
         }
         let tempBoard = self.board
         let kingPos = self.board.getKingPosition(color: self.piece.color == "white" ? "black" : "white")
-        if let tempPiece = self.board.getPiece(row: kingPos.0, col: kingPos.1) {
+        if let tempPiece = self.board.getPiece(position: Position(x: kingPos.x, y: kingPos.y)) {
             let checkConditions = CheckConditions(board: tempBoard, piece: tempPiece)
             if checkConditions.kingInCheck() {
                 self.kingInCheck = "+"
@@ -180,9 +246,9 @@ class MoveLog {
     }
     
     func copy() -> MoveLog {
-        let copiedPiece = self.piece
-        let copiedCapturedPiece = self.capturedPiece
-        let copiedOriginalPawn = self.originalPawn
+        let copiedPiece = self.piece.copy()
+        let copiedCapturedPiece = self.capturedPiece?.copy()
+        let copiedOriginalPawn = self.originalPawn?.copy()
         
         var newMovelog = MoveLog(
             board: self.board,

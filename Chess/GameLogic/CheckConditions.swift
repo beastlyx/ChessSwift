@@ -1,11 +1,11 @@
 // Full working pins and check logic that removes any moves from valid moves that either put king in check, or dont protect king in check.
 class CheckConditions {
     var piece: GamePiece
-    var move: (Int, Int)?
+    var move: Position?
     var board: Board
-    var kingPosition: (Int, Int)
+    var kingPosition: Position
     
-    init(board: Board, piece: GamePiece, move: (Int, Int)? = nil) {
+    init(board: Board, piece: GamePiece, move: Position? = nil) {
         self.piece = piece.copy()
         self.move = move
         self.board = board.deepCopy()
@@ -38,20 +38,20 @@ class CheckConditions {
         return moves.contains(where: { $0 == self.kingPosition })
     }
     
-    func getOpponentMoves() -> [(Int, Int)] {
-        var moves: [(Int, Int)] = []
+    func getOpponentMoves() -> Set<Position> {
+        var moves: Set<Position> = Set()
         for row in 0..<8 {
             for col in 0..<8 {
-                if let piece = self.board.getPiece(row: row, col: col),
+                if let piece = self.board.getPiece(position: Position(x: row, y: col)),
                    piece.pieceType != "king" && piece.color != self.piece.color {
-                    moves.append(contentsOf: piece.getLegalMoves(board: self.board))
+                    moves.formUnion(piece.getLegalMoves(board: self.board))
                 }
             }
         }
         return moves
     }
     
-    func kingInCheckCastle(kingPath: [(Int, Int)]) -> Bool {
+    func kingInCheckCastle(kingPath: Set<Position>) -> Bool {
         let moves = self.getOpponentMoves()
         for path in kingPath {
             if moves.contains(where: { $0 == path }) || moves.contains(where: { $0 == self.kingPosition }) {
@@ -61,13 +61,13 @@ class CheckConditions {
         return false
     }
     
-    func getPlayerMoves() -> [(Int, Int)] {
-        var moves: [(Int, Int)] = []
+    func getPlayerMoves() -> Set<Position> {
+        var moves: Set<Position> = Set()
         for row in 0..<8 {
             for col in 0..<8 {
-                if let piece = self.board.getPiece(row: row, col: col), piece.color == self.piece.color {
+                if let piece = self.board.getPiece(position: Position(x: row, y: col)), piece.color == self.piece.color {
                     piece.getLegalMoves(board: self.board)
-                    moves.append(contentsOf: piece.validateLegalMoves(board: self.board))
+                    moves.formUnion(piece.validateLegalMoves(board: self.board))
                 }
             }
         }
@@ -95,7 +95,7 @@ class CheckConditions {
         var black_count = 0
         for row in 0..<8 {
             for col in 0..<8 {
-                let piece = self.board.getPiece(row: row, col: col)
+                let piece = self.board.getPiece(position: Position(x: row, y: col))
                 if piece != nil {
                     if piece?.color == "white" {
                         white_count += 1

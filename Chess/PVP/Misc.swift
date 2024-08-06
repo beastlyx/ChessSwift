@@ -40,9 +40,13 @@ struct MoveData: Identifiable, Codable, Equatable {
     }
 }
 
-struct Position: Codable, Equatable {
+struct Position: Hashable, Codable {
     var x: Int
     var y: Int
+    
+    func destructure() -> (Int, Int) {
+        return (x, y)
+    }
 }
 
 let maxTimeRemaining = 600
